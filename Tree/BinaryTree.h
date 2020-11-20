@@ -23,6 +23,11 @@
  *          5、 完全二叉树中，从根节点开始按层序遍历顺序依次编号，root = 1, 某节点的编号为 i, 树的总结点数 = n
  *              (1) 如果2i>n，则结点i无左孩子（结点i为叶子结点）；否则其左孩子是结点2i。
                 (2) 如果2i+1>n，则结点i无右孩子；否则其右孩子是结点2i+1
+
+
+    树、森林、二叉树的转换， 树->二叉：兄弟之间建立连接，双亲结点与除了第一个孩子之外的孩子断开连接，然后兄弟间连接的转为右孩子连接
+    森林：二叉树：所有树转为二叉，然后依次将树的根节点作为上一棵树的根节点的右孩子
+    至于二叉转其他，就是逆过程罢了
  */
 
 /*
@@ -30,6 +35,7 @@
  *
  */
 #include "../StackAndQueue/Queue/SequentialQueue.h"
+#include "../StackAndQueue/Stack/SequentialStack.h"
 
 template<typename T>
 struct binaryNide {
@@ -126,6 +132,94 @@ trackTree<T> *InOrderTraverse_Thr(trackTree<T> *root, trackTree<T> **pre) { //�
         return *pre; //此时*pre指向最后一个遍历的节点
     }
 }
+
 //前序、后续线索化的原理大致一致,那两个if和pre写在遍历当前节点root的前面即可， 你把两个if遮住理解一下
+
+//如何推导出来线索二叉树的遍历的算法：只要你自己画个树，然后补全其中的后继箭头，然后从中发现遍历的规律，尝试推测路径
+
 //线索二叉树的遍历， 先给二叉树加个头结点，其leftChild指向树的根节点，rightChild指向最后一个遍历的节点，同样最后一个节点的后继为头结点
+template<typename T>
+//中序线索二叉树遍历
+void InOrderTraverse_Thread(trackTree<T> *head, SequentialQueue<T> *queue) {
+    trackTree<T> *root = head->leftChild;
+    while (root != head) { //根据之前做的改动，最后遍历必须要到达头结点
+        if (root != nullptr) {
+            //中序遍历左子树也先遍历，我就一路左下，找到最左下的节点
+            while (root->isLeftChild == isChild && root->leftChild != nullptr) {
+                root = root->leftChild;
+            }
+            queue->queueIn(root->data); //这棵子树第一个遍历的节点
+
+            //也看得出来，这两个while也是对左子树和右子树处理，而上面这行语句跟遍历根节点一样，跟中序遍历的原理基本一致
+            //如果是前序线索遍历 : 上面这条语句放在第一个while的前面，第一个while代码块中再加上这条语句，放在root = root->leftChild后面
+
+            //此时这个最左下的节点有两种情况，它有没有右子树，没有的话，他右指针必然指向后继，就不需要我们另外找了
+            while (root->isRightChild == isPreOrNext && root->rightChild != nullptr &&
+                   root->rightChild != head) { //访问当头结点就结束了
+                root = root->rightChild;
+                queue->queueIn(root->data);
+            }
+            //还有右子树的话，说明root为根的子树还未全部遍历，只需右子树的根作为新的根重新开始就行
+            root = root->rightChild; //如果rightChild是null的话，在上面的while已经遍历完了,当然加上null判断更保险
+        }
+    }
+}
+
+//如果root节点的任意一个孩子节点有右孩子，就入栈
+template<typename T>
+void checkDoItsChildHasRightChild(trackTree<T> *root, SequentialStack<trackTree<T> *> stack) {
+    trackTree<T> *rightChild, *leftChild;
+    if (root->isLeftChild == isChild && root->leftChild != nullptr) {
+        leftChild = root->leftChild;
+    }
+    if (root->isRightChild == isChild && root->rightChild != nullptr) {
+        rightChild = root->rightChild;
+    }
+    if ((rightChild->isRightChild == isChild && rightChild->rightChild != nullptr) ||
+        (leftChild->isRightChild == isChild && leftChild->rightChild != nullptr)) {
+        stack.push(root);
+    }
+}
+
+template<typename T>
+//后序线索二叉树遍历
+void PostOrderTraverse_Thread(trackTree<T> *head, SequentialQueue<T> *queue, SequentialStack<trackTree<T> *> stack) {
+    trackTree<T> *root = head->leftChild, *stackTop = nullptr, *preNode = nullptr; // stackTop即栈顶的指针，preNode是上次遍历的节点
+    while (root != head->leftChild) { //之前的前序还是中序，最后一个节点必然是叶子，但后续的最后一个节点是整棵树的根，最后只会回到根
+        if (root != nullptr) {
+            /*
+             * 通过不同情况的后续线索二叉树遍历，我发现如果有一个节点root，它的任意一个孩子有右孩子的话，他自身的孩子就无法通过PreOrNext重新指向root
+             * 但由于这是后续遍历，所以回到root是必须的，没办法，我突然想到可以用栈保存遍历过程中有这种情况的root，待会返回时，只需与栈顶（最近的）节点比较
+             * 如果右子树遍历完了，就返回root，否则指向root.rightChild,继续
+             */
+            if (preNode == root->leftChild || preNode->rightChild) { //左右子树都遍历完了，回到了根节点，此时停在这，就是因为没有指向的根节点的线索
+                stack.getTop(&stackTop);
+                if (root == stackTop->rightChild ||
+                    (root == stackTop->leftChild && stackTop->isRightChild == isPreOrNext)) { //只有右节点遍历完才行
+                    queue->queueIn(stackTop->data); //根节点遍历
+                    preNode = stackTop;
+                    stack.pop(&root);
+                } else
+                    root = stackTop->rightChild; //如果rightChild是null的话，必然有preOrNext，所以无需担心
+            } else {     //先一路左下
+                while (root->isLeftChild == isChild && root->leftChild != nullptr) {
+                    checkDoItsChildHasRightChild(root, stack); //是否有上面说的那种情况的root
+                    root = root->leftChild;
+                }
+            }
+
+            //遍历线索
+            while (root->isRightChild == isPreOrNext && root->rightChild != nullptr && root->rightChild != head) {
+                queue->queueIn(root->data);
+                preNode = root;
+                root = root->rightChild;
+            }
+            //此时左下到头，线索也没有，必然存在右子树的可能，但不排除根节点的右子树已经遍历
+            if (preNode != root->rightChild) //这时root必然有右孩子，否则它上面就有PreOrNext,左右子树都遍历完后回到根节点，就不要又回去了
+                root = root->rightChild;
+        }
+    }
+}
+
+
 #endif //CLIONCPP_BINARYTREE_H
