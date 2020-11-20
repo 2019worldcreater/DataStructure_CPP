@@ -1,3 +1,6 @@
+//
+// Created by HP on 2020-11-20.
+//
 
 #include <iostream>
 #include "Tree/BinaryTree.h"
@@ -5,7 +8,7 @@
 using namespace std;
 
 binaryNode<char> *create(char c) {
-    binaryNode<char> *root = (binaryNode<char> *) malloc(sizeof(binaryNode<char>));
+    binaryNode<char> *root = (binaryNode<char> *) malloc(sizeof(binaryNode < char > ));
     root->data = c;
     root->leftChild = nullptr; //必须确保一定是null
     root->rightChild = nullptr;
@@ -13,7 +16,7 @@ binaryNode<char> *create(char c) {
 }
 
 trackTree<char> *createThread(char c) {
-    trackTree<char> *root = (trackTree<char> *) malloc(sizeof(trackTree<char>));
+    trackTree<char> *root = (trackTree<char> *) malloc(sizeof(trackTree < char > ));
     root->data = c;
     root->leftChild = nullptr;
     root->rightChild = nullptr;
@@ -22,7 +25,7 @@ trackTree<char> *createThread(char c) {
     return root;
 }
 
-int main() {
+int mainSDas() {
     trackTree<char> *root = createThread('c');
     trackTree<char> *root1 = createThread('a');
     trackTree<char> *root2 = createThread('b');

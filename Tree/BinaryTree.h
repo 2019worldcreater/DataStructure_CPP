@@ -38,40 +38,40 @@
 #include "../StackAndQueue/Stack/SequentialStack.h"
 
 template<typename T>
-struct binaryNide {
+struct binaryNode {
     T data;
-    binaryNide<T> *leftChild, *rightChild;
+    binaryNode<T> *leftChild, *rightChild;
 };
 
 //前序遍历根为root的子树，原理 ：先遍历根节点、遍历左子树（递归）、遍历右子树（递归）
 template<typename T>
-void PreOrderTraverse(binaryNide<T> *root, SequentialQueue<T> *queue) {//保存在队列中，方便拿出啦，否则数组还要传下标递归
+void PreOrderTraverse(binaryNode<T> *root, SequentialQueue<T> *queue) {//保存在队列中，方便拿出啦，否则数组还要传下标递归
     if (root != nullptr) {
         queue->queueIn(root->data);
-        PreOrderTraverse(root->leftChild); //左子树又作为新的树遍历
+        PreOrderTraverse(root->leftChild, queue); //左子树又作为新的树遍历
         //root的左子树遍历完才会轮到右子树, 同样左子树的子树也是一样的遍历顺序
-        PreOrderTraverse(root->rightChild); //不用担心child是null，开头有判断
+        PreOrderTraverse(root->rightChild, queue); //不用担心child是null，开头有判断
     }
 }
 
 //中序遍历根为root的子树，原理 ：先遍历左子树（递归），然后根节点、遍历右子树（递归）
 template<typename T>
-void InOrderTraverse(binaryNide<T> *root, SequentialQueue<T> *queue) {
+void InOrderTraverse(binaryNode<T> *root, SequentialQueue<T> *queue) {
     if (root != nullptr) {
         //一个节点被遍历的前序条件就是他的左孩子被遍历到，并且左孩子遍历完的下一个必然是根节点，然后才是右孩子
-        InOrderTraverse(root->leftChild); //左子树作为新的树继续遍历，同样根要在左子树的左子树之后
+        InOrderTraverse(root->leftChild, queue); //左子树作为新的树继续遍历，同样根要在左子树的左子树之后
         queue->queueIn(root->data);
-        InOrderTraverse(root->rightChild);
+        InOrderTraverse(root->rightChild, queue);
     }
 }
 
 //后序遍历，左子树、右子树、根
 template<typename T>
-void PostOrderTraverse(binaryNide<T> *root, SequentialQueue<T> *queue) {
+void PostOrderTraverse(binaryNode<T> *root, SequentialQueue<T> *queue) {
     if (root != nullptr) {
         //一个节点被遍历的前序条件就是他的左、右孩子都被遍历到，并且左、右孩子遍历完的下一个必然是根节点,优先左孩子
-        InOrderTraverse(root->leftChild);
-        InOrderTraverse(root->rightChild);
+        PostOrderTraverse(root->leftChild, queue);
+        PostOrderTraverse(root->rightChild, queue);
         queue->queueIn(root->data);
     }
 }
@@ -97,11 +97,10 @@ void PostOrderTraverse(binaryNide<T> *root, SequentialQueue<T> *queue) {
  * 为了区分child指向的是孩子还是前驱或后继，需要一个flag标识
  */
 template<typename T>
-struct trackTree {
+struct trackTree {  //直接malloc一个节点中，child指针未必是null，可能在遍历过程中发生错误
     T data;
     bool isLeftChild, isRightChild; //如果false就是前驱或后继
-    trackTree<T> *leftChild, rightChild;
-
+    trackTree<T> *leftChild, *rightChild;
 };
 
 enum childFlag {
@@ -131,15 +130,16 @@ trackTree<T> *InOrderTraverse_Thr(trackTree<T> *root, trackTree<T> **pre) { //�
         InOrderTraverse_Thr(root->rightChild, pre);
         return *pre; //此时*pre指向最后一个遍历的节点
     }
+    return nullptr;
 }
 
 //前序、后续线索化的原理大致一致,那两个if和pre写在遍历当前节点root的前面即可， 你把两个if遮住理解一下
 
 //如何推导出来线索二叉树的遍历的算法：只要你自己画个树，然后补全其中的后继箭头，然后从中发现遍历的规律，尝试推测路径
 
-//线索二叉树的遍历， 先给二叉树加个头结点，其leftChild指向树的根节点，rightChild指向最后一个遍历的节点，同样最后一个节点的后继为头结点
+//线索二叉树的遍历， 先给二叉树加个头结点，其leftChild指向树的根节点，rightChild指向最后一个遍历的节点，同样最后一个节点的后继为头结点(后续线索的最后一个节点是根节点)
 template<typename T>
-//中序线索二叉树遍历
+//中序线索二叉树遍历, 传入头结点
 void InOrderTraverse_Thread(trackTree<T> *head, SequentialQueue<T> *queue) {
     trackTree<T> *root = head->leftChild;
     while (root != head) { //根据之前做的改动，最后遍历必须要到达头结点
