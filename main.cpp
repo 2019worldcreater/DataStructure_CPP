@@ -4,23 +4,6 @@
 
 using namespace std;
 
-binaryNode<char> *create(char c) {
-    binaryNode<char> *root = (binaryNode<char> *) malloc(sizeof(binaryNode<char>));
-    root->data = c;
-    root->leftChild = nullptr; //必须确保一定是null
-    root->rightChild = nullptr;
-    return root;
-}
-
-trackTree<char> *createThread(char c) {
-    trackTree<char> *root = (trackTree<char> *) malloc(sizeof(trackTree<char>));
-    root->data = c;
-    root->leftChild = nullptr;
-    root->rightChild = nullptr;
-    root->isRightChild = isChild;
-    root->isLeftChild = isChild;
-    return root;
-}
 
 int main() {
     trackTree<char> *root = createThread('c');
@@ -58,37 +41,4 @@ int main() {
     free(root2);
     free(root1);
     return 0;
-}
-
-void testTreeOrder() {
-    binaryNode<char> *root = create('c');
-    binaryNode<char> *root1 = create('a');
-    binaryNode<char> *root2 = create('b');
-    binaryNode<char> *root3 = create('d');
-    binaryNode<char> *root4 = create('g');
-    binaryNode<char> *root5 = create('e');
-    binaryNode<char> *root6 = create('f');
-    root->leftChild = root1;
-    root1->leftChild = root2;
-    root1->rightChild = root3;
-    root3->rightChild = root4;
-    root->rightChild = root5;
-    root5->leftChild = root6;
-    auto *queue = new SequentialQueue<char>();
-    //PreOrderTraverse(root, queue); //c,a,b,d,g,e,f
-    //InOrderTraverse(root, queue); //b,a,d,g,c,f,e,
-    PostOrderTraverse(root, queue); //b,g,d,a,f,e,c,
-    while (!queue->isEmpty()) {
-        char c;
-        queue->queueOut(&c);
-        cout << c << ",";
-    }
-    delete queue;
-    free(root);
-    free(root6);
-    free(root5);
-    free(root4);
-    free(root3);
-    free(root2);
-    free(root1);
 }
