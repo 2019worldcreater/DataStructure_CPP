@@ -1,44 +1,36 @@
 
 #include <iostream>
-#include "Tree/BinaryTree.h"
+#include "Map/DFS_OR_BFS.h"
+#include "Map/MinimumCostTree.h"
 
 using namespace std;
 
 
 int main() {
-    trackTree<char> *root = createThread('c');
-    trackTree<char> *root1 = createThread('a');
-    trackTree<char> *root2 = createThread('b');
-    trackTree<char> *root3 = createThread('d');
-    trackTree<char> *root4 = createThread('g');
-    trackTree<char> *root5 = createThread('e');
-    trackTree<char> *root6 = createThread('f');
-    SequentialQueue<char> *queue = new SequentialQueue<char>();
-    root->leftChild = root1;
-    root1->leftChild = root2;
-    root1->rightChild = root3;
-    root3->rightChild = root4;
-    root->rightChild = root5;
-    root5->leftChild = root6;
-    trackTree<char> *pre = nullptr; //必须是null，否则线索化
-    trackTree<char> *head = createThread('h');
-    head->rightChild = InOrderTraverse_Thr(root, &pre); //中序线索化，返回最后一个遍历的节点指针
-    head->rightChild->rightChild = head; //头结点，作为一个标准，最后一个节点指向头指针
-    head->leftChild = root; //指向树的root
-    InOrderTraverse_Thread(head, queue); //b,a,d,g,c,f,e,
-    while (!queue->isEmpty()) {
-        char c;
-        queue->queueOut(&c);
-        cout << c << ",";
+    edgeInfoList<char> *map = new edgeInfoList<char>(5);
+    char c[] = {'A', 'B', 'C', 'D', 'E'};
+    for (int i = 0; i < 5; ++i) {
+        map->vexList[i] = c[i];
     }
-    free(head);
+    SequentialQueue<edgeInfo> *queue = new SequentialQueue<edgeInfo>();
+    map->addEdge(1, 2, 10);
+    map->addEdge(2, 4, 10);
+    map->addEdge(0, 1, 20);
+    map->addEdge(0, 4, 30);
+    map->addEdge(0, 3, 40);
+    map->addEdge(3, 4, 50);
+    map->addEdge(2, 3, 50);
+    KrusKal_MinimumTree(map, queue);
+
+    int sum = 0;
+    for (int j = 0; j < map->vexNum - 1; ++j) {
+        edgeInfo edgeInfo;
+        queue->queueOut(&edgeInfo);
+        cout << edgeInfo.start << "," << edgeInfo.end << endl;
+        sum += edgeInfo.weight;
+    }
+    cout << sum << "dsas";
     delete queue;
-    free(root);
-    free(root6);
-    free(root5);
-    free(root4);
-    free(root3);
-    free(root2);
-    free(root1);
+    delete map;
     return 0;
 }

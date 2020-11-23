@@ -36,7 +36,7 @@
  *   强连通图：有向图中，任意两个顶点间都存在路径可到达
  *   有向图的强连通分量（极大强连通子图）： 子图、强连通
  *
- *   连通图的生成树：有n个顶点n-1条边的连通图
+ *   连通图的生成树：一个连通图的连通子图，该子图包含全部顶点，但只能有 n-1条边
  *   如果一个图有n个顶点和小于n-1条边，则是非连通图，如果它多于n-1边条，必定构成一个环
  *
  *   如果一个有向图恰有一个顶点的入度为0，其余顶点的入度均为1，则是一个有向树
@@ -45,7 +45,7 @@
 
 /*
  * 第一种存储方法：邻接矩阵
- * 一个一维数组保存顶点。一个二维数组edgeMatrix保存边信息
+ * 一个一维数组保存顶点。一个二维数组edgeMatrix保存边信息 ， Vi表示在顶点数组中下标为i的顶点
  * edgeMatrix[i][j] = 1 ( 存在(Vi,Vj)[(Vj,Vi)] 或 <Vi, Vj> ), 0 不存在
  * 如果要存储带权值的图，只需将1-->权值，0-->不可能数，因为权值可能是0或负数
  *
@@ -56,10 +56,36 @@
  */
 template<typename T>
 class NearByMatrix {
-private:
-    T vertex[4]; //保存顶点信息
-    int edgeMatrix[4][4]; //nxn方阵
+public:
+    T *vertex; //保存顶点信息, [n]
+    int **edgeMatrix; //nxn方阵, [n][n]
     int numVertexes, numEdges;
+
+    //顶点数组和矩阵需要自己设置值
+    NearByMatrix(int verxNum) {
+        this->numVertexes = verxNum;
+        vertex = new T[verxNum];
+        edgeMatrix = new int *[verxNum]; //指向指针数组， 每个即是行
+        for (int i = 0; i < verxNum; ++i) {
+            edgeMatrix[i] = new int[verxNum]; //数组中的指针指向一个数组， 即是二维数组
+        }
+        for (int i = 0; i < numVertexes; ++i) {
+            for (int j = 0; j < numVertexes; ++j) {
+                edgeMatrix[i][j] = 0;
+            }
+        }
+    }
+
+    //添加边信息，这是无向边的添加
+    void addEdge(int vex1, int vex2) {
+        edgeMatrix[vex1][vex2] = edgeMatrix[vex2][vex1] = 1;
+    }
+
+    ~NearByMatrix() {
+        for (int i = 0; i < numVertexes; i++)
+            delete[] edgeMatrix[i]; //先释放每个指针指向的数组
+        delete[] edgeMatrix; //再释放指针数组
+    }
     /*
      * 创建和初始化，只需读入顶点，将matrix先全设为NoEdge
      * 然后输入numEdges条边的 i\j\权值， matrix[i][j]=权值
@@ -68,7 +94,7 @@ private:
 };
 
 /*
- * 第二种方法：邻接表，类似树的孩子表示法，参考LinkChildTree， 如果边数很少，那么nxn方阵会有很多浪费
+ * 第二种方法：邻接表，类似树的孩子表示法，参考LinkChildTree， 如果边数很少，那么nxn方阵会有很多浪费,即适用点多边少
  * 即一种顺序线性表用顺序表存储所有顶点，每个顶点还有一个单链表(边表)，存储与其邻接的顶点下标和边的权值
  * 意味着一条无向边在两个顶点的边表中都有存储
  *
@@ -93,6 +119,7 @@ struct AdjacencyListNode {
 
 template<typename T>
 class AdjacencyList {
+public:
     ArrayList<AdjacencyListNode<T>> *list; //存储所有顶点
     int numVertexes, numEdges; //初始化同样要输入i,j,权值，只不过其中涉及插入链表操作
 };
@@ -177,4 +204,41 @@ struct duochongVex { //顺序表中保存的节点
 struct edgeInfo {
     int start, end, weight; //边的两顶点在数组中下标
 };
+
+template<typename T>
+class edgeInfoList {
+public:
+    int vexNum;
+    ArrayList<edgeInfo> *list;
+    T *vexList; //顶点信息集， 顶点下标从 0~vexNum-1
+
+    //设置全部顶点信息[0]~[vexNum-1]
+    void setVexInfo(T *vexInfo) {
+        if (vexInfo != nullptr) {
+            for (int i = 0; i < vexNum; ++i) {
+                vexList[i] = vexInfo[i];
+            }
+        }
+    }
+
+    //下标需是 0~vexNum-1, 建议按照 start<end,weight从小到大添加
+    void addEdge(int start, int end, int weight) {
+        edgeInfo edge{start, end, weight}; //vexList[start]
+        list->addItem(edge);
+    }
+
+    //顶点信息就不保存了，自己知道下标对应谁就行
+    edgeInfoList(int vexNum) {
+        this->vexNum = vexNum;
+        list = new ArrayList<edgeInfo>();
+        vexList = new T[vexNum];
+    }
+
+    ~edgeInfoList() {
+        list->clean();
+        delete list;
+        delete[] vexList;
+    }
+};
+
 #endif //CLIONCPP_MAP_H
