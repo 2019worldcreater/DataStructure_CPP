@@ -1,3 +1,7 @@
+//
+// Created by HP on 2020-11-24.
+//
+
 
 #include <iostream>
 #include "Map/KeyPath.h"
@@ -6,7 +10,7 @@ using namespace std;
 
 int main() {
     tuopuMap<int> *map = new tuopuMap<int>(10);
-    map->addVex(0, 0);
+    map->addVex(0, 0); //顶点信息,入度，保存的顺序即为下标
     map->addVex(1, 1);
     map->addVex(2, 1);
     map->addVex(3, 2); //写错一个都会失败
@@ -17,7 +21,7 @@ int main() {
     map->addVex(8, 1);
     map->addVex(9, 2);
 
-    map->addOuEdge(0, 1, 3);
+    map->addOuEdge(0, 1, 3); //0表示第一个加入的顶点
     map->addOuEdge(0, 2, 4);
     map->addOuEdge(1, 3, 5);
     map->addOuEdge(1, 4, 6);
@@ -31,7 +35,7 @@ int main() {
     map->addOuEdge(8, 9, 3);
     map->addOuEdge(6, 9, 2);
 
-    SequentialQueue<edgeInfo> *queue = new SequentialQueue<edgeInfo>();
+    SequentialQueue <edgeInfo> *queue = new SequentialQueue<edgeInfo>();
     findKeyPath(map, queue);
     edgeInfo edge;
     while (!queue->isEmpty()) {
