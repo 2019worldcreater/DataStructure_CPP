@@ -47,7 +47,7 @@
  * 第一种存储方法：邻接矩阵
  * 一个一维数组保存顶点。一个二维数组edgeMatrix保存边信息 ， Vi表示在顶点数组中下标为i的顶点
  * edgeMatrix[i][j] = 1 ( 存在(Vi,Vj)[(Vj,Vi)] 或 <Vi, Vj> ), 0 不存在
- * 如果要存储带权值的图，只需将1-->权值，0-->不可能数，因为权值可能是0或负数
+ * 如果要存储带权值的图，只需将1-->权值，0-->65535(infinity)， 因为权值可能是0或负数
  *
  * 无向图的邻接矩阵是以左上-右下对角线为轴，两边对称。 即对称矩阵,即 matrix[i][j] = matrix[j][i]
 *  无向图中顶点Vi的度，即matrix[i][0]~matrix[x][n-1]的和， 而检查是否Vi邻接于Vj，只需matrix[i][j]=1
@@ -71,14 +71,14 @@ public:
         }
         for (int i = 0; i < numVertexes; ++i) {
             for (int j = 0; j < numVertexes; ++j) {
-                edgeMatrix[i][j] = 0;
+                edgeMatrix[i][j] = 0; //在一些程序中是以0判断，所以最好不要改吧,如果有权值的需求，就自己再修改一下值为65535
             }
         }
     }
 
     //添加边信息，这是无向边的添加
-    void addEdge(int vex1, int vex2) {
-        edgeMatrix[vex1][vex2] = edgeMatrix[vex2][vex1] = 1;
+    void addEdge(int vex1, int vex2, int weight = 1) {
+        edgeMatrix[vex1][vex2] = edgeMatrix[vex2][vex1] = weight;
     }
 
     ~NearByMatrix() {
