@@ -36,10 +36,12 @@
  */
 #include "../StackAndQueue/Queue/SequentialQueue.h"
 #include "../StackAndQueue/Stack/SequentialStack.h"
+#include "malloc.h"
 
 template<typename T>
 struct binaryNode { //线索二叉树这个不能缺少点信息
     T data;
+    int height = 1; //平衡二叉树的需要，不影响已有程序的使用
     binaryNode<T> *leftChild, *rightChild;
 };
 
