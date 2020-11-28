@@ -15,9 +15,13 @@ int main() {
     tree->addValue(100);
     tree->addValue(101); //12左旋
     tree->deleteByKey(10); //删除10后，11成为了失衡点，对11左旋
-    /*binaryNode<int> *node = tree->findData(8); //别通过*node更改节点数值，否则会出错
+    tree->addValue(21);
+    tree->addValue(32);
+
+
+    binaryNode<int> *node = tree->findData(899); //别通过*node更改节点数值，否则会出错
     tree->reCalculateHeight(node);
-    cout << node->data;*/
+    cout << node->data;
     delete tree;
     return 0;
 }
