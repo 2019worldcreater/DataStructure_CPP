@@ -87,7 +87,7 @@ struct RBnode {
 RBnode *root;
 
 
-//对当前节点node进行操作，node默认红色
+//对当前节点node进行操作，node默认红色,表示要融合进一个节点
 void dealWithNewNode(RBnode *node) {
     RBnode *parent = findParent(node->data); //找到当前节点的父节点
 
@@ -174,41 +174,56 @@ void deleteNode(int key) {
     RBnode *node = findNode(key); //待删除节点
     if (!node)
         return;
-    dealWithDeletedNode(node, true);
+    dealWithDeletedNode(node);
 }
 
 //这里科普一下：红色节点必然同时有两个孩子，或同时没有，红色节点的两个孩子必然是 3-,或4-中的两个孩子，而3-,4-是孩子同时有/无的
 //如果是黑色节点，那么黑色节点只有一个孩子的情况只有一种: 一个红色孩子，并且该红色孩子没有孩子
 //黑色节点有两个孩子的情况 : 1\两个黑色   2\一个黑色,一个红色(该红色一定有2个黑色孩子)  3\两个红色(这两红一定同时有/无孩子)
 
-//该函数结束后，可以直接删除节点
+//删除的真正处理
+/*
+ * 1. 红色节点
+ *      1.1红色叶子
+ *      1.2红色非叶子（必然有2黑色子树）
+ * 2. 黑色节点(必然有非null兄弟节点)
+ *      2.1黑色叶子
+ *          2.1.1红色兄弟节点（不太可能存在这种情况，暂时没遇过, 转为2.1.2)
+ *          2.1.2黑色兄弟节点
+ *              2.1.2.1存在红色远侄子
+ *              2.1.2.2存在红色近侄子(转为2.1.2.1)
+ *              2.1.2.3父红，兄弟没孩子
+ *      2.2黑色非叶子
+ *          2.2.1有两个子树
+ *          2.2.2只有一个子树（必然是红孩子，且没孩子）
+ */
 void dealWithDeletedNode(RBnode *node) {
-    if (node->color) {  //删除的是红色节点
-        if (!node->rightChild && !node->leftChild) { //如果是红色叶子节点，只需删除就行
-            if (isDeleted)
-                freeNode(node);  //该红节点与parent组成3-还是4-都无所谓，直接剔除，不影响
+    if (node->color) {  //1.删除的是红色节点
+        if (!node->rightChild && !node->leftChild) { //1.1如果是红色叶子节点，只需删除就行
+            freeNode(node);  //该红节点与parent组成3-还是4-都无所谓，直接剔除，不影响
             return;
-        } else {
+        } else {  // 1.2 红色非叶子
             RBnode *replace = node->leftChild; //找到替代的直接前驱节点
             while (replace->rightChild) //从左孩子一路右下
                 replace = replace->rightChild;
+            //将代替节点的值赋给删除节点
             node->data = replace->data; //这时删除的节点就转变成了replace, 不必考虑replace还有子树，接下来的replace递归调用会考虑的
             dealWithDeletedNode(replace); //以replace为新的删除节点看待
+            return;
         }
-    } else { //如果删除节点是黑色节点
+    } else { //2.如果删除节点是黑色节点
         RBnode *parent = findParent(node); //删除节点的父节点
         RBnode *bro; //node的兄弟节点
-        if (!node->rightChild && !node->leftChild) { //如果是黑色叶子节点
+        if (!node->rightChild && !node->leftChild) { //2.1如果是黑色叶子节点
             if (!parent) { //此时根节点直接删除
-                if (isDeleted)
-                    freeNode(node);
+                freeNode(node);
                 return;
             }
             /*
              * 此时存在父节点P，不管P是红是黑，因为存在node这个黑色孩子，所以必然P的另一个孩子存在，并且红、黑都有可能
              */
             bro = parent->leftChild == node ? parent->rightChild : parent->leftChild; //node的兄弟节点
-            if (bro->color) { //兄弟节点是红色，(但我觉得 node黑，兄红的情况根本不存在把!!!!!!!)
+            if (bro->color) { // 2.1.1 兄弟节点是红色，(但我觉得 node黑，兄红的情况不存在把!!!!!!!,暂时没遇到过)
                 //按照2-3-4树： 假如D为node，P为parent, B为bro， 那么 P B为3-, D是最左边的child1(D为P左孩子)或最右边的child3
                 //3-的孩子一定同时有，所有B节点必然也有两个黑色节点(红节点孩子只能黑),其中离D最近的才是在2-3-4树中真正的兄弟节点
                 parent->color = true; //父节点改为红
@@ -220,7 +235,8 @@ void dealWithDeletedNode(RBnode *node) {
                 //实际上上面的代码执行后，对 D P B(Bl,Br) 三者间在2-3-4树中的结构没改变
                 //实际上此时的D的new bro才是在2-3-4树中真正的bro
                 dealWithDeletedNode(node); //此时node的兄弟节点变成了黑色
-            } else { //兄弟节点是黑色
+                return;
+            } else { //2.1.2  兄弟节点是黑色
                 //实际上此时bro如果有孩子，那么一定是红孩子, 为了不违法特性(5)，且红孩子都没孩子
                 RBnode *distantNephew; //兄弟节点中离node最远的孩子
                 RBnode *closeNephew;
@@ -232,7 +248,7 @@ void dealWithDeletedNode(RBnode *node) {
                     closeNephew = bro->rightChild;
                 }
                 //先看看远侄子是否为红色，如果不是即null，那就看近侄子是否为红色
-                if (distantNephew) { //如果bro这个位置存在孩子节点
+                if (distantNephew) { //2.1.2.1 如果bro这个位置存在孩子节点
                     if (distantNephew->color) { //如果远侄子是红色
                         //此时bro的另一个孩子节点必然是null或者红色节点
                         //并且这两个孩子节点必然没有子节点,如果有(且是黑色)，违反了(5)特性,因为从parent到叶子节点要经过一样多的黑色节点
@@ -248,11 +264,10 @@ void dealWithDeletedNode(RBnode *node) {
                         else
                             leftTurn(parent);
 
-
                         freeNode(node);
                         return; //此时直接删掉node即可
                     }
-                } else if (closeNephew) { //看看近侄子是否为红色节点,实际上很上面的逻辑概念一样，所以这里将这个近红想办法转为远红即可
+                } else if (closeNephew) { //2.1.2.2 看看近侄子是否为红色节点,实际上很上面的逻辑概念一样，所以这里将这个近红想办法转为远红即可
                     if (closeNephew->color) {
                         //此时只要将bro,close组成的3-换个表示就行，比如close取代bro,bro放在远侄位置，两者颜色互换，不影响原结构,这时按照上面的情况处理
                         bro->color = true;
@@ -262,26 +277,29 @@ void dealWithDeletedNode(RBnode *node) {
                         else
                             rightTurn(bro);
                         dealWithDeletedNode(node); //按照远侄处理
+                        return;
                     }
                 }
 
                 //运行到这，说明bro没有孩子，都是null,而这时需判断父节点的颜色
-                if (parent->color) {  //红父，node黑，bro黑
+                if (parent->color) {  // 2.1.2.3 红父，node黑，bro黑
                     //这时红父必然是 3-/4-的成员,我们这里设想3-情形
                     //假如 P,K组成3-, 如果删除node,那么P不满足两个孩子同时有，所以3-无法维持，只需将3-变为2-(K),
                     //于是P与另一个孩子组成3-,作为K的孩子
                     parent->color = false;
                     bro->color = true;
                     freeNode(node);
+                    return;
                 }
                 //我觉得三黑的情况 不可能存在吧，毕竟要融合
             }
-        } else { //黑色非叶子节点
-            if (node->leftChild && node->rightChild) { //有两个子树时
+        } else { //2.2 黑色非叶子节点
+            if (node->leftChild && node->rightChild) { //2.2.1 有两个子树时
                 RBnode *replace = findRepalce(node);  //意思就是找到node的直接前驱
                 node->data = replace->data;
                 dealWithDeletedNode(replace);
-            } else { //只有一个子树，必然是红孩子
+                return;
+            } else { //2.2.2 只有一个子树，必然是红孩子，且红孩子没有孩子
                 //即用其红孩子取代node原位置，然后将h红孩子改为黑（直接替换值也可以，不用改颜色）
                 RBnode *child;
                 if (node->leftChild)
@@ -290,6 +308,7 @@ void dealWithDeletedNode(RBnode *node) {
                     child = node->rightChild;
                 node->data = child->data; //与孩子的值替换即可
                 dealWithDeletedNode(child); //删除child即可
+                return;
             }
         }
     }
