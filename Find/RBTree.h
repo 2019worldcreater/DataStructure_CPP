@@ -55,6 +55,8 @@
  2、红黑树: 通过二叉查找树表示2-3-4树，  还有一种简化红黑树，即红节点只处于左孩子，与2-3树等价
  红黑树的时间复杂度为: O(lgn)
 
+ 红黑树一般是自平衡的，它并不是严格的AVL树，左右子树的相差值可能大于1，但避免许多旋转操作，适合插入、删除较多的情况
+
  假如node1有两个红色节点孩子，那么这三者形成 4-, 如果只有1个，那么形成3-,只有黑色，则是普通的2-
  即可以将红色节点与其父节点组装在一起形成 3-/4-,而原来红色节点的两个孩子在3-/4-也有一席之地
  假如有两个红色孩子，那么形成的4-节点，中child1,child2即是左红的两个孩子，child3,child4则是右红的两个孩子
@@ -67,10 +69,10 @@
 (2) 根节点是黑色。
 (3) 每个叶子节点是黑色。 [注意：这里叶子节点，是指为空的叶子节点！]--比如 node.left=null,这个node.left才叫叶子
 (4) 如果一个节点是红色的，则它的子节点必须是黑色的。  (红节点已与其parent组装，子节点不能与红节点组装)
-(5) 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+(5) 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。(从P节点到以P为根的子树上所有的叶子节点的路径上拥有同样多的黑色节点)
  一棵含有n个节点的红黑树的高度至多为2log(n+1).
 
- 在过程中
+ 这些特性可以与2-3-4树中的孩子同时有/无特性联动
  *
  */
 
@@ -85,11 +87,12 @@ struct RBnode {
 RBnode *root;
 
 
-//对当前节点node进行操作
+//对当前节点node进行操作，node默认红色
 void dealWithNewNode(RBnode *node) {
     RBnode *parent = findParent(node->data); //找到当前节点的父节点
 
     //如果当前节点是根节点，那么只需将根节点颜色改为黑色即可
+    //当前节点可能是分裂出来的grandParent，既然无人可融合，那就不融合
     if (parent == nullptr) {
         node->color = false; //根节点改为黑色
         return;
@@ -118,25 +121,34 @@ void dealWithNewNode(RBnode *node) {
         //按照2-3-4树的理解 ： 4-分裂为2-,2-,3-  ,3-就是插入的node和其父节点parent
         parent->color = false;
         parentBro->color = false;
-        grandParent->color = true; //分裂出来的中间数node试着与上层融合
+        grandParent->color = true; //分裂出来的中间数node试着与上层融合，如果grandParent是root，那么在之前的判断中会改为黑，表示向上再盖一层
         dealWithNewNode(grandParent); //grandParent则是分裂出来的中间数
-    } else if (!parentBroColorIsRed && side) { //2、叔不红，当前节点是左孩子
-        //父设为黑，祖父设为红，对祖父进行右旋
-        parent->color = false;  //实际上 node,parent,grandparent此时就是一个4-
-        // 为了让三者在树中表示，只需让node,grandParent成为parent的两个孩子(右旋Grand),然后node,grand都是红色
-        grandParent->color = true;
-        rightTurn(grandParent); //不需要考虑节点的孩子的BF值是否异号，直接右旋
-    } else if (!parentBroColorIsRed && !side) {//2、叔不红，当前节点是右孩子
-        //实际上parent,node,grand就是一个 4-，将其转为两个红孩子的结构,左旋是为了使三者在一条线上
-        RBnode *newNode = parent;
-        leftTurn(newNode); //对父节点左旋，左旋后，父节点parent是node的孩子了，但parent的数据不变，所以还是能通过key查找
-        dealWithNewNode(newNode);  //原来的父节点作为当前节点，继续处理,此时newNode的parent是node
-        //转为了上面的第二种情况
+    } else if (!parentBroColorIsRed && side) { //2、叔不红，当前节点node是parent左孩子
+        if (parent == grandParent->leftChild) {//parent是grandPant的左孩子
+            //父设为黑，祖父设为红，对祖父进行右旋
+            parent->color = false;  //实际上 node,parent,grandparent此时就是一个4-,大小顺序也是如此
+            // 为了让三者在树中表示，只需让node,grandParent成为parent的两个孩子(右旋Grand),然后node,grand都是红色
+            grandParent->color = true;
+            rightTurn(grandParent); //不需要考虑节点的孩子的BF值是否异号，直接右旋
+        } else { //parent是祖父的右孩子
+            rightTurn(parent); //父节点右旋，目的则是使 node,parent,grand一条线，并且grand,node,parent保持原本的大小顺序
+            dealWithNewNode(parent); //父节点作为新节点处理
+        }
+    } else if (!parentBroColorIsRed && !side) {//2、叔不红，当前节点node是parent右孩子
+        if (parent == grandParent->rightChild) {
+            //实际上parent,node,grand就是一个 4-，将其转为两个红孩子的结构
+            parent->color = false;
+            grandParent->color = true;
+            leftTurn(grandParent);
+        } else { //使三者一条线
+            leftTurn(parent);
+            dealWithNewNode(parent);
+        }
     }
 
 }
 
-//红黑树添加
+//先正常添加节点，后面再想办法平衡
 template<typename T>
 void addNodeInRedBlackTree(int key) {
     if (findData(key)) //存在key节点
@@ -153,6 +165,148 @@ void addNodeInRedBlackTree(int key) {
         root = node; //作为根结点
 
     dealWithNewNode(node); //对当前节点node进行操作
+}
+
+
+//红黑树的删除
+template<typename T>
+void deleteNode(int key) {
+    RBnode *node = findNode(key); //待删除节点
+    if (!node)
+        return;
+    dealWithDeletedNode(node, true);
+}
+
+//这里科普一下：红色节点必然同时有两个孩子，或同时没有，红色节点的两个孩子必然是 3-,或4-中的两个孩子，而3-,4-是孩子同时有/无的
+//如果是黑色节点，那么黑色节点只有一个孩子的情况只有一种: 一个红色孩子，并且该红色孩子没有孩子
+//黑色节点有两个孩子的情况 : 1\两个黑色   2\一个黑色,一个红色(该红色一定有2个黑色孩子)  3\两个红色(这两红一定同时有/无孩子)
+
+//该函数结束后，可以直接删除节点
+void dealWithDeletedNode(RBnode *node) {
+    if (node->color) {  //删除的是红色节点
+        if (!node->rightChild && !node->leftChild) { //如果是红色叶子节点，只需删除就行
+            if (isDeleted)
+                freeNode(node);  //该红节点与parent组成3-还是4-都无所谓，直接剔除，不影响
+            return;
+        } else {
+            RBnode *replace = node->leftChild; //找到替代的直接前驱节点
+            while (replace->rightChild) //从左孩子一路右下
+                replace = replace->rightChild;
+            node->data = replace->data; //这时删除的节点就转变成了replace, 不必考虑replace还有子树，接下来的replace递归调用会考虑的
+            dealWithDeletedNode(replace); //以replace为新的删除节点看待
+        }
+    } else { //如果删除节点是黑色节点
+        RBnode *parent = findParent(node); //删除节点的父节点
+        RBnode *bro; //node的兄弟节点
+        if (!node->rightChild && !node->leftChild) { //如果是黑色叶子节点
+            if (!parent) { //此时根节点直接删除
+                if (isDeleted)
+                    freeNode(node);
+                return;
+            }
+            /*
+             * 此时存在父节点P，不管P是红是黑，因为存在node这个黑色孩子，所以必然P的另一个孩子存在，并且红、黑都有可能
+             */
+            bro = parent->leftChild == node ? parent->rightChild : parent->leftChild; //node的兄弟节点
+            if (bro->color) { //兄弟节点是红色，(但我觉得 node黑，兄红的情况根本不存在把!!!!!!!)
+                //按照2-3-4树： 假如D为node，P为parent, B为bro， 那么 P B为3-, D是最左边的child1(D为P左孩子)或最右边的child3
+                //3-的孩子一定同时有，所有B节点必然也有两个黑色节点(红节点孩子只能黑),其中离D最近的才是在2-3-4树中真正的兄弟节点
+                parent->color = true; //父节点改为红
+                bro->color = false; //bro变黑
+                if (parent->leftChild == node) //如果node是左孩子，对parent左旋
+                    leftTurn(parent);
+                else
+                    rightTurn(parent); //对parent右旋
+                //实际上上面的代码执行后，对 D P B(Bl,Br) 三者间在2-3-4树中的结构没改变
+                //实际上此时的D的new bro才是在2-3-4树中真正的bro
+                dealWithDeletedNode(node); //此时node的兄弟节点变成了黑色
+            } else { //兄弟节点是黑色
+                //实际上此时bro如果有孩子，那么一定是红孩子, 为了不违法特性(5)，且红孩子都没孩子
+                RBnode *distantNephew; //兄弟节点中离node最远的孩子
+                RBnode *closeNephew;
+                if (node == parent->leftChild) {
+                    distantNephew = bro->rightChild;
+                    closeNephew = bro->leftChild;
+                } else {
+                    distantNephew = bro->leftChild;
+                    closeNephew = bro->rightChild;
+                }
+                //先看看远侄子是否为红色，如果不是即null，那就看近侄子是否为红色
+                if (distantNephew) { //如果bro这个位置存在孩子节点
+                    if (distantNephew->color) { //如果远侄子是红色
+                        //此时bro的另一个孩子节点必然是null或者红色节点
+                        //并且这两个孩子节点必然没有子节点,如果有(且是黑色)，违反了(5)特性,因为从parent到叶子节点要经过一样多的黑色节点
+
+                        //假如要删除 node
+                        //实际上以下步骤是从原先2-3-4树中 node的兄弟节点bro(3-,4-)中取出中间数即bro取代parent原先的位置(bro成为2-,或者3-)
+                        //然后parent取代node的位置，很合理，如果bro有另一个孩子K,那么K与P为3-（右/左旋）, 而distantNephew成为了2-
+                        bro->color = parent->color; //父、兄节点交换颜色
+                        parent->color = false;
+                        distantNephew->color = false; //该远侄子改为黑色
+                        if (distantNephew == bro->leftChild) //如果node是P的右孩子，对P右旋
+                            rightTurn(parent);
+                        else
+                            leftTurn(parent);
+
+
+                        freeNode(node);
+                        return; //此时直接删掉node即可
+                    }
+                } else if (closeNephew) { //看看近侄子是否为红色节点,实际上很上面的逻辑概念一样，所以这里将这个近红想办法转为远红即可
+                    if (closeNephew->color) {
+                        //此时只要将bro,close组成的3-换个表示就行，比如close取代bro,bro放在远侄位置，两者颜色互换，不影响原结构,这时按照上面的情况处理
+                        bro->color = true;
+                        closeNephew->color = false;
+                        if (closeNephew == bro->rightChild)
+                            leftTurn(bro);
+                        else
+                            rightTurn(bro);
+                        dealWithDeletedNode(node); //按照远侄处理
+                    }
+                }
+
+                //运行到这，说明bro没有孩子，都是null,而这时需判断父节点的颜色
+                if (parent->color) {  //红父，node黑，bro黑
+                    //这时红父必然是 3-/4-的成员,我们这里设想3-情形
+                    //假如 P,K组成3-, 如果删除node,那么P不满足两个孩子同时有，所以3-无法维持，只需将3-变为2-(K),
+                    //于是P与另一个孩子组成3-,作为K的孩子
+                    parent->color = false;
+                    bro->color = true;
+                    freeNode(node);
+                }
+                //我觉得三黑的情况 不可能存在吧，毕竟要融合
+            }
+        } else { //黑色非叶子节点
+            if (node->leftChild && node->rightChild) { //有两个子树时
+                RBnode *replace = findRepalce(node);  //意思就是找到node的直接前驱
+                node->data = replace->data;
+                dealWithDeletedNode(replace);
+            } else { //只有一个子树，必然是红孩子
+                //即用其红孩子取代node原位置，然后将h红孩子改为黑（直接替换值也可以，不用改颜色）
+                RBnode *child;
+                if (node->leftChild)
+                    child = node->leftChild;
+                else
+                    child = node->rightChild;
+                node->data = child->data; //与孩子的值替换即可
+                dealWithDeletedNode(child); //删除child即可
+            }
+        }
+    }
+}
+
+//释放节点
+void freeNode(RBnode *node) {
+    RBnode *parent = findParent(node);
+    if (parent) {
+        if (parent->leftChild == node)
+            parent->leftChild = nullptr;
+        else
+            parent->rightChild = nullptr;
+    } else {
+        root = nullptr;
+    }
+    free(node);
 }
 
 #endif //CLIONCPP_BTREE_H
