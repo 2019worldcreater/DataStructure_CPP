@@ -84,8 +84,21 @@ struct RBnode {
     RBnode *leftChild = nullptr, *rightChild = nullptr;
     bool color = true;
 };
-RBnode *root;
+RBnode *root; //根节点
 
+/*
+ * 1.是否为根节点
+ * 2.父节点为黑色
+ * 3.父红
+ *      3.1 叔红
+ *      3.2叔不红 (叔一定非null)
+ *          3.2.1 node是父的右孩子
+ *              3.2.1.1 父是祖父右孩子
+ *              3.2.1.2 父是祖父左孩子
+ *          3.2.2 node是父的左孩子
+ *              3.2.2.1 父是祖父右孩子
+ *              3.2.2.2 父是祖父左孩子
+ */
 
 //对当前节点node进行操作，node默认红色,表示要融合进一个节点
 void dealWithNewNode(RBnode *node) {
