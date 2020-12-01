@@ -74,6 +74,7 @@ public:
         return key % MAX_HASH_SIZE; // k mod m
     }
 
+    //添加key，如果有则放弃
     bool add(int key) {
         int index = hashCode(key); //下标
         if (list[index] == nullptr) { //说明该位置不存在元素
@@ -88,6 +89,7 @@ public:
         return false;
     }
 
+    //是否有key
     bool findKey(int key) {
         int index = hashCode(key); //下标
         if (list[index] == nullptr) { //说明该位置不存在元素

@@ -123,7 +123,7 @@ void calculateNextValue(const char *str, int *next, int len) {
      * 当kmp失败(s[j+1]!=t[k])的时候，会使k=next[k],然后对比s[j+1]和t[k],如果又失败，继续。。
      * 但我们仔细想想，如果 t[next[k]] = t[k], 何不干脆使next[k] = next[next[k]],这样少那么多跳转
      * 所以我们可以对之前的next数组改造 :
-     *  if(str[j] == str[next[j]], 那么使 next[j]=next[next[j]]; 否则保持原样
+     *  if(str[j] == str[next[j]), 那么使 next[j]=next[next[j]]; 否则保持原样
      */
 
     //next[0] = -1,next[1]=0
