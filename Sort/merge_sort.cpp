@@ -1,11 +1,14 @@
 #include "declaration/merge_sort.h"
 
+int *temp = nullptr; //归并时需要将归并结果存储在一个临时数组中temp，然后再复制到arr中
+//如果放在函数中声明，会因为递归导致多个临时数组生成，堆栈容易溢出
+
 //合并操作,将分别排好序的left{low~mid}部分和right{mid+1,high}部分合并到arr{low~high}中
 //我只需告诉数组的界限即可合并,合并的操作范围可能只是arr的一部分
 void merge(int *arr, int low, int mid, int high) {
-    if (low >= high) //小于2个元素，直接返回
+    if (low >= high || mid < low) //小于2个元素或错误，直接返回
         return;
-    int temp[high - low + 1]; //left,right合并结果先存在temp中，否则arr会被覆盖，因为合并前的left,right就保存在arr中
+    //left,right合并结果先存在temp中，否则arr会被覆盖，因为合并前的left,right就保存在arr中
     int leftIndex = low, rightIndex = mid + 1, minValue, index = 0;
     while (leftIndex <= mid && rightIndex <= high) { //两方都不为空时
         if (arr[rightIndex] < arr[leftIndex]) //只有右边比左边小时才选右边，保证稳定性
@@ -25,7 +28,9 @@ void merge(int *arr, int low, int mid, int high) {
 }
 
 void merge_sort_main(int *arr, int len) { //只是提供调用而已
+    temp = new int[len]; //为临时数组分配空间
     merge_sort(arr, 0, len - 1);
+    delete[] temp;
 }
 
 void merge_sort(int *arr, int low, int high) {
@@ -50,6 +55,7 @@ void merge_sort(int *arr, int low, int high) {
  * 所以我们可以使用迭代结构，人为操控合并次序，即合并哪两个部分或者说合并后的大部分的low，high以及分割线mid
  */
 void merge_sort_dieDai(int *arr, int len) {
+    temp = new int[len]; //为临时数组分配空间
     //一开始我们让每两个相邻的元素构成的逻辑数组进行合并(gap=2), merge(0,0,1),merge(2,2,3)....merge(n,n,n-1)
     //然后再让每四个连续元素构成的数组进行合并(gap=4), merge(0,1,3), merge(4,5,7),...
     //gap = gap * 2.....
@@ -71,8 +77,8 @@ void merge_sort_dieDai(int *arr, int len) {
      * 后来我总结发现，当第一次配对不够时，mid就直接设为那部分的中位数，然后将mid设为low-1(这部分第一位数的下标 -1)
      * 然后第二次配对不够时，这时 mid 沿用之前的 low-1,然后 mid = newLow - 1
      * 以此类推，这样可以保证每次归并时使用的mid都具有意义
-     * 我发现，每次配对不够的部分的长度必然是大于等于上一次不够时部分的长度
-     * 至于为什么每次数量不够时 low~mid一定排序了，自己用数学证明下，我是偶然发现的
+     * 我发现，出现第一次配对不够时，以后的每次gap配对都会出现不够的情况，且长度只增(可以不变)不减
+     * 至于为什么每次数量不够时 low~mid一定排序了，自己用脑袋思考下
      */
     int gap = 2, low, mid, high; //low，mid，high保持过程中的逻辑数组界限
     bool notOver = true;
@@ -98,4 +104,5 @@ void merge_sort_dieDai(int *arr, int len) {
             notOver = false;
         gap *= 2;//范围扩大一倍
     }
+    delete[] temp;
 }

@@ -1,12 +1,23 @@
 #include <iostream>
+#include <ctime>
+#include "Sort/declaration/quick_sort.h"
 #include "Sort/declaration/merge_sort.h"
+#include "Sort/declaration/heap_sort.h"
+#include "Sort/declaration/shell_sort.h"
+#include "Sort/declaration/bubble_sort.h"
 
 using namespace std;
 
 
 int main() {
-    int a[10000] = {1, 5, 2, 4, 2, 3, 1, 21, 3};
-    merge_sort_dieDai(a, sizeof(a) / sizeof(int));
+    int a[500000];
+    int size = sizeof(a) / sizeof(int);
+    srand(time(NULL));
+    for (int i = 0; i < size; ++i) {
+        a[i] = size - i;
+    }
+    quick_sort(a, size);
+    printProgramExecutionTime();
     return 0;
 }
 

@@ -17,13 +17,14 @@ void shell_sort(int *arr, int len) {
      *
      * 实际上分组进行插入排序是为了利用插入排序的特性（元素少时很好用）,每趟都是为了让元素分布更接近结果,最后一趟插入排序时就可以少做事
      */
-    for (int gap = len / 2; gap > 0; gap = gap / 2) { //k趟排序
+    int gap, i, index, current;
+    for (gap = len >> 1; gap > 0; gap = gap >> 1) { //k趟排序, gao的初始值，和 gap=gap/?这两个地方可以改，>> 1是除以2，我发现这时挺好的
         //每组的直接插入排序都是从第二个元素开始的，向前比较，而gap之前的元素必然是每组中的第一个元素，不需要比较(也没得比较)
-        for (int i = gap; i < len; i++) { //逻辑上是分组进行插入排序的，但其实这里是各组交替进行的，gap~len-1肯定存在不同组的
+        for (i = gap; i < len; i++) { //逻辑上是分组进行插入排序的，但其实这里是各组交替进行的，gap~len-1肯定存在不同组的
             // 如果我们真的严格为每组分别进行。其实没必要增加这个麻烦
             // 反正最终都会遍历到gap~len-1中的元素，何必呢
-            int index = i - gap; //先开始比较组内前一个元素
-            int current = arr[i]; //提出的值
+            index = i - gap; //先开始比较组内前一个元素
+            current = arr[i]; //提出的值
             while (index >= 0 && current < arr[index]) { //理应先比较index>=0,否则越界
                 arr[index + gap] = arr[index]; //逻辑后移
                 index = index - gap;
