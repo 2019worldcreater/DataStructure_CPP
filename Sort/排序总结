@@ -1,0 +1,44 @@
+首先测试一下10个算法的性能：以50万个数据作为测试数组，类型包括随机数组、降序数组(表示已经是降序序列)、升序数组、重复数组(重复元素多的)
+声明： 这10个算法都是处理升序的
+        其中冒泡排序、直接选择排序、直接插入排序这三个 O(n^2)的排序算法不进行测试，因为太慢了，就算是5000个元素，都比其他排序算法处理50万还慢，元素少还看不出来
+
+耗时是整个程序的运行时间，不妨碍比较, 每个算法，每个类型都测试三次，取平均值
+其中归并排序采用迭代的归并实现
+
+没写的就没测了
+
+算法      随机数组    降序数组    升序数组    重复数组（耗时采用ms, 1s = 1000ms）
+希尔排序    354
+堆排序      398
+归并排序    218
+快速排序    248                             ??慢
+计数排序    74
+桶排序     129        75        60          84
+基数排序    176       181       158         176
+
+
+排序算法对于复杂结构的考虑 node{key, value}, 无非就是将node序列中的key取出来比较，但交换、移动还是作为整体的
+对于非int型key，可以使用对应的比较器，但在计数、桶、基数排序中只能使用数值型key
+
+升序改降序
+1,shell_sort 第28行 current > arr[index] 即可
+2, heap_sort, 堆排序，只需将构造大顶堆改为构造小顶堆，主函数不变, 47行改为 arr[lc] > arr[rc], 49行改为 arr[child] < arr[parent]
+3,归并排序，只需改一下归并函数中的逻辑，从谁小选谁，改为谁大选谁， merge_sort 14行 arr[rightIndex] > arr[leftIndex]
+4,quick_sort 快速排序，改下pivot_sort中的处理，43行 arr[i] > pivot
+5,counting_sort 计数排序, 47,56行改为 max-arr[i]
+6,bucket_sort, 桶排序， 46行映射函数由 arr[i]-min 改为 max-arr[i]
+7,radix_sort, 基数排序，由bucket[digitValue],改为 bucket[9-digitValue]
+
+其实你将升序序列方向输出不成降序的了吗
+
+
+    int a[500000];
+    int size = sizeof(a) / sizeof(int);
+    srand(time(NULL));
+    for (int i = 0; i < size; ++i) {
+        a[i] = rand();
+    }
+    ?_sort(a, size);
+    printProgramExecutionTime();
+
+

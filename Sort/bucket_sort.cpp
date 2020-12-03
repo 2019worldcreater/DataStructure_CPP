@@ -70,12 +70,13 @@ void bucket_sort(int *arr, int len) {
     }
 
     int *address = outArray; //每个桶的逻辑数组起始地址
-    //对每个逻辑桶进行排序
+    //对每个逻辑桶进行排序, 各个桶之间互不干扰
     for (int m = 0; m < BUCKET_NUM; ++m) {
-        direct_insert_sort(address, bucket_size[m]);
+        direct_insert_sort(address, bucket_size[m]); //采用直接插入排序
         address += bucket_size[m]; //下一个桶的起始地址
     }
 
+    //输出
     for (int i1 = 0; i1 < len; ++i1) {
         arr[i1] = outArray[i1];
     }
