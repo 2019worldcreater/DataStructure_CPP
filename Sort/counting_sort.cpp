@@ -1,7 +1,7 @@
 #include "declaration/counting_sort.h"
 
 /*
- * 计数排序，其实是个挺简单的排序方法，通过牺牲空间，来换取效率
+ * 计数排序，其实是个挺简单的排序方法
  * 原理: 我们找到arr中最大值max，准备数组 bucket[max+1]={0,0..} 即为每个数准备的桶
  * 然后遍历数组 arr, 如果 arr[i] = k, 那么bucket[k]++
  * 最后遍历输出 bucket, 假如 bk[2]=3,那么就连续输出3个2(赋值在原数组arr中)
@@ -34,6 +34,8 @@
 void counting_sort(int *arr, int len) {
     int min, max;
     getMaxAndMinValueInArray(arr, len, &max, &min);
+    if (min == max) //我感觉不需要弄了
+        return;
     int *bucket = new int[max - min + 1]; //计数桶
     for (int m = 0; m < max - min + 1; ++m) {
         bucket[m] = 0;

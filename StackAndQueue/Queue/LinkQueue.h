@@ -19,7 +19,8 @@ private:
 
     nodePtr createNode() {
         nodePtr node = (nodePtr) malloc(sizeof(Node<T>)); //不能返回指向栈内存的指针
-        node->next = nullptr;
+        if (node)
+            node->next = nullptr;
         return node;
     }
 
@@ -48,11 +49,13 @@ public:
 
     void queueIn(T data) {
         nodePtr node = createNode();
-        node->data = data;
-        node->next = nullptr;
-        rear->next = node;
-        rear = node;
-        this->length++;
+        if (node) {
+            node->data = data;
+            node->next = nullptr;
+            rear->next = node;
+            rear = node;
+            this->length++;
+        }
     }
 
     bool queueOut(T *data) {
