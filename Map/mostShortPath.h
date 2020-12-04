@@ -110,4 +110,66 @@ void FloydMostShortPath(NearByMatrix<T> *map, int **pathMatrix,
     }
 }
 
+
+struct bellNode {
+    int parent;
+    int next;
+    int weight;
+};
+
+/*
+ * 主要思想：所有的边进行n-1轮松弛，因为在一个含有n个顶点的图中，任意两点之间的最短路径最多包含n-1条边。
+ * 换句话说，第1轮在对所有的边进行松弛操作后，得到从1号顶点只能经过一条边到达其余各定点的最短路径长度
+ * 第2轮在对所有的边进行松弛操作后，得到从1号顶点只能经过两条边到达其余各定点的最短路径长度，........
+
+此外，Bellman-Ford算法可以检测一个图是否含有负权的回路：如果经过n-1轮松弛后任然存在dst[e[i]]>dst[s[i]]+w[i].
+ */
+template<typename T>
+bool Bellman_Ford(NearByMatrix<T> *map, bellNode *pathMatrix, int start) { //可用于含有负权的图
+    //假设有一张表  parent, next, weight, 表示 源点 start,想要最短到达next，就需要经过先parent,weight表示路径
+    //同时parent也可能是在其他中充当next, 所以最终结果中，如果想要知道start->'C',就先查找next='C'
+    // 然后看parent是否为start,如果不是,假设是 K,就再去查找 next=K, 以此类推
+    for (int k = 0; k < map->numVertexes; ++k) { //初始化表
+        pathMatrix[k].parent = start;
+        pathMatrix[k].weight = 65535; //假设无穷远
+        pathMatrix[k].next = k;
+    }
+    pathMatrix[start].weight = 0; //自己到自己
+    for (int i = 0; i < map->numVertexes - 1; ++i) {//每一轮对所有边进行遍历，共numVex-1轮，i无意义
+        //每一轮中一个边 n --> k,实际上参与过几次，因为start->n, 和  start->k都可能发生变化
+        bool isDone = true; //如果一轮中没有发生更新，可以结束
+        for (int j = 0; j < map->numVertexes; ++j) { //遍历所有边
+            for (int k = 0; k < map->numVertexes; ++k) {
+                int edge = map->edgeMatrix[j][k];
+                if (edge != 0) {
+                    //假如遇到边 4->6,此时看看这条边能不能使 start->6缩短, 即start->4 + 4->6 < start->6, 然后将parent改为4,路径长度更新
+                    if (pathMatrix[j].weight + edge < pathMatrix[k].weight) {
+                        pathMatrix[k].parent = j;
+                        pathMatrix[k].weight = pathMatrix[j].weight + edge;
+                        isDone = false;
+                    }
+                }
+            }
+        }
+        if (isDone)
+            return true;
+    }
+
+    //如果还能找到，说明存在负权回路
+    bool flag = false;
+    for (int j = 0; j < map->numVertexes; ++j) {
+        for (int k = 0; k < map->numVertexes; ++k) {
+            int edge = map->edgeMatrix[j][k];
+            if (edge != 0) {
+                if (pathMatrix[j].weight + edge < pathMatrix[k].weight) {
+                    flag = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return !flag;
+}
+
 #endif //CLIONCPP_MOSTSHORTPATH_H

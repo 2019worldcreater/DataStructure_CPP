@@ -4,7 +4,6 @@ using namespace std;
 
 
 int main() {
-    cout << "data structure get done" << endl;
+    cout << "hello world";
     return 0;
 }
-

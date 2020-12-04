@@ -112,3 +112,21 @@ int floydtest() {
     delete[]path;
     return 0;
 }
+
+void bellFordTest() {
+    //数据一样
+    bellNode p[map->numVertexes];
+    if (Bellman_Ford(map, p, 0)) {
+        for (int j = 0; j < map->numVertexes; ++j) {
+            bellNode node = p[j];
+            cout << node.parent << "," << node.next << "," << node.weight << endl;
+        }
+    }
+
+    cout << "if 0 -> 6" << endl;
+    int parent = p[6].parent;
+    while (parent != 0) { //不是源点，还有中转
+        cout << parent << ",";
+        parent = p[parent].parent; //3,4,2,1 --> 代表 0,1,2,4,3,6
+    }
+}
