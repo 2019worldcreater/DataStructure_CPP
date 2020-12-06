@@ -116,7 +116,7 @@ int floydtest() {
 void bellFordTest() {
     //数据一样
     bellNode p[map->numVertexes];
-    if (Bellman_Ford(map, p, 0)) {
+    if (Bellman_Ford(map, p, 0)) { //可以使用SPFA算法(改进版本), if(SPFA(map,p,0)){
         for (int j = 0; j < map->numVertexes; ++j) {
             bellNode node = p[j];
             cout << node.parent << "," << node.next << "," << node.weight << endl;

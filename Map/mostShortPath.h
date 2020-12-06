@@ -5,6 +5,7 @@
 #ifndef CLIONCPP_MOSTSHORTPATH_H
 #define CLIONCPP_MOSTSHORTPATH_H
 
+#include "../StackAndQueue/Queue/SequentialQueue.h"
 #include "Map.h"
 
 /*
@@ -115,7 +116,7 @@ void FloydMostShortPath(NearByMatrix<T> *map, int **pathMatrix,
 
 
 struct bellNode {
-    int parent;
+    int parent; // 源点->next需最后经过parent, 存在 start->...->parent->next,
     int next;
     int weight;
 };
@@ -141,10 +142,16 @@ bool Bellman_Ford(NearByMatrix<T> *map, bellNode *pathMatrix, int start) { //可
     }
     //这里没有对start直连的顶点初始化，因为下面的循环体中第一轮会起到初始化作用的
     pathMatrix[start].weight = 0; //自己到自己
-    
-    //为什么要对每条边ij进行松弛,因为可能存在 start->i + ij < start-j
-    //为什么要进行n-1次循环: 实际上第一轮帮得上忙的边只有与start直连的边, 第2轮可能帮的上忙的边只有与start邻接顶点邻接的边，第3轮只有与start的邻接点的邻接点.......
-    //至于为什么要对所有边遍历，因为图是复杂的，鬼知道哪条边是帮的上忙的
+
+    //为什么要进行n-1次循环: 实际上第一轮帮得上忙的边只有与start直连的边, 即存在 start->i
+    // 第2轮有用的只有以start为中心,内2层的边： start->i, i->k, 那么 start-i为内一层，i-k为内2层
+    //其他轮也一样，因为假如有边 ij,但 i没遍历到，那么 dist[i] + ij < dist[j]的可能性你觉得呢,除非ij是负数，但根本毫无意义
+    //即每一轮用的上的边应该至少有一个端点已经遍历到了，否则松弛操作没意义
+    //至于为什么要对所有边遍历，因为图是复杂的，鬼知道哪条边是帮的上忙的,谁能判断哪条边是内几层呢
+    //同一条边可能会进行多次松弛，比如 ij,第一次帮dist[j]松弛了,后面有条边 ki,帮dist[i]松弛，这时 ij又可以松弛dist[j]
+    //其实松弛ij操作就是 i 作为start->j的中转点,start->j最多可能有n-1个中转点,i中转了j,k中转了i,ij又可松弛,l中转了k,ki松弛了,那么ij松弛了，所以最多有n-1次循环
+    //所以事实上每一轮帮上忙的边：1.有一端点已遍历到即（ij松弛了,j遍历到了）  2.假如ij可松弛，那么需要有 ki 已松弛,即刚松弛点的关联边才有用
+    //所以这个算法是值得改进的，见 SPFA 算法
     for (int i = 0; i < map->numVertexes - 1; ++i) {//每一轮对所有边进行遍历，共numVex-1轮
         bool isDone = true; //如果一轮中没有发生更新，可以结束
         for (int j = 0; j < map->numVertexes; ++j) { //遍历所有边
@@ -152,10 +159,10 @@ bool Bellman_Ford(NearByMatrix<T> *map, bellNode *pathMatrix, int start) { //可
                 int edge = map->edgeMatrix[j][k];
                 if (edge != 0) {
                     //假如遇到边 4->6,此时看看这条边能不能使 start->6缩短, 即start->4 + 4->6 < start->6, 然后将parent改为4,路径长度更新
-                    if (pathMatrix[j].weight + edge < pathMatrix[k].weight) {
-                        pathMatrix[k].parent = j;
+                    if (pathMatrix[j].weight + edge < pathMatrix[k].weight) {  //松弛操作
+                        pathMatrix[k].parent = j; //中转站
                         pathMatrix[k].weight = pathMatrix[j].weight + edge;
-                        isDone = false;
+                        isDone = false; //进行了松弛
                     }
                 }
             }
@@ -179,6 +186,56 @@ bool Bellman_Ford(NearByMatrix<T> *map, bellNode *pathMatrix, int start) { //可
     }
 
     return !flag;
+}
+
+//贝尔曼算法的优化版本, 考虑到每一轮的松弛边只有部分有用,见152行
+template<typename T>
+bool SPFA(NearByMatrix<T> *map, bellNode *pathMatrix, int start) {
+    for (int k = 0; k < map->numVertexes; ++k) { //初始化表
+        pathMatrix[k].parent = start;
+        pathMatrix[k].weight = 65535;
+        pathMatrix[k].next = k;
+    }
+    pathMatrix[start].weight = 0;
+
+    //既然已松弛过的边ij中的 j? 才需要松弛,并且已遍历到的点的关联边才有资格松弛, 可以用队列实现
+    SequentialQueue<int> *queue = new SequentialQueue<int>();
+
+    queue->queueIn(start); //初始化,只有start的关联边有资格松弛
+    bool isVisited[map->numVertexes]; //是否在队列中
+    int softTime[map->numVertexes]; //每个顶点的关联边的松弛次数，如果超过定点数，则存在负权环路
+    for (int j = 0; j < map->numVertexes; ++j) {
+        isVisited[j] = false;
+        softTime[j] = 0;
+    }
+    isVisited[start] = true;
+    int head;
+    while (!queue->isEmpty()) { //队空时结束，表示没有边需要松弛了
+        queue->queueOut(&head); //出队
+        isVisited[head] = false;
+        softTime[head]++; //松弛次数+1
+        if (softTime[head] >= map->numVertexes) { //松弛次数最多只能为 n-1
+            delete queue;
+            return false; //存在负权环路
+        }
+        for (int i = 0; i < map->numVertexes; ++i) { //对所有关联边松弛
+            //松弛 head->i, dist[head] + head-i < dist[i]
+            if (map->edgeMatrix[head][i] != 0 && //差点因为没加这个 0 判断就出错了,有边才行
+                pathMatrix[head].weight + map->edgeMatrix[head][i] < pathMatrix[i].weight) {
+                pathMatrix[i].weight = pathMatrix[head].weight + map->edgeMatrix[head][i]; //更新
+                pathMatrix[i].parent = head;
+
+                //即head-i已松弛,那么i的关联边可以松弛试试
+                //如果存在负权环路
+                if (!isVisited[i]) { //如果没在队列中
+                    queue->queueIn(i);
+                    isVisited[i] = true; //记得改
+                }
+            }
+        }
+    }
+    delete queue;
+    return true;
 }
 
 #endif //CLIONCPP_MOSTSHORTPATH_H

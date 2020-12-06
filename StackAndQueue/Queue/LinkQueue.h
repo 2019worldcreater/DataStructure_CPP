@@ -61,11 +61,13 @@ public:
     bool queueOut(T *data) {
         if (!isEmpty()) {
             nodePtr node = front->next;
-            *data = node->data;
-            front->next = node->next;
-            free(node);
-            this->length--;
-            return true;
+            if (node) {
+                *data = node->data;
+                front->next = node->next;
+                free(node);
+                this->length--;
+                return true;
+            }
         }
         return false;
     }
