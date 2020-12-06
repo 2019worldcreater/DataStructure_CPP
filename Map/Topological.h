@@ -104,8 +104,8 @@ void topoLogicalSort(tuopuMap<T> *map, SequentialQueue<int> *queue, int *etv = n
         queue->queueIn(head); //输出
         list->getDataByIndex(head, &node); //对消除该顶点的出边，逻辑上的
         LinkList<AdjacencyNodeWithWeight> *Linklist = node.outEdge;
-        for (int i = 0; i < Linklist->getLength(); ++i) {
-            AdjacencyNodeWithWeight node1;
+        for (int i = 0; i < Linklist->getLength(); ++i) { //对所有head的出边遍历
+            AdjacencyNodeWithWeight node1; //head的出边信息
             int point; //<head,point>
             Linklist->getDataByIndex(i, &node1);
             point = node1.index;
@@ -118,7 +118,7 @@ void topoLogicalSort(tuopuMap<T> *map, SequentialQueue<int> *queue, int *etv = n
 
             //顶点i的最早开始时间要取最大的值，所以每次都要判断当前<head,index>
             //此时的etv[head]必然已经求解出来，因为其度为0
-            if (etv != nullptr && (etv[head] + node1.weight) > etv[point])
+            if (etv != nullptr && (etv[head] + node1.weight) > etv[point]) //只要有边 i,point,就要看看是否etv正确
                 etv[point] = etv[head] + node1.weight; //前一个点的最早开始时间和一个边活动的持续时间
         }
     }
