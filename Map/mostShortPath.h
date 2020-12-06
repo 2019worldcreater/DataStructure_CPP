@@ -139,9 +139,13 @@ bool Bellman_Ford(NearByMatrix<T> *map, bellNode *pathMatrix, int start) { //可
         pathMatrix[k].weight = 65535; //假设无穷远
         pathMatrix[k].next = k;
     }
+    //这里没有对start直连的顶点初始化，因为下面的循环体中第一轮会起到初始化作用的
     pathMatrix[start].weight = 0; //自己到自己
-    for (int i = 0; i < map->numVertexes - 1; ++i) {//每一轮对所有边进行遍历，共numVex-1轮，i无意义
-        //每一轮中一个边 n --> k,实际上参与过几次，因为start->n, 和  start->k都可能发生变化
+    
+    //为什么要对每条边ij进行松弛,因为可能存在 start->i + ij < start-j
+    //为什么要进行n-1次循环: 实际上第一轮帮得上忙的边只有与start直连的边, 第2轮可能帮的上忙的边只有与start邻接顶点邻接的边，第3轮只有与start的邻接点的邻接点.......
+    //至于为什么要对所有边遍历，因为图是复杂的，鬼知道哪条边是帮的上忙的
+    for (int i = 0; i < map->numVertexes - 1; ++i) {//每一轮对所有边进行遍历，共numVex-1轮
         bool isDone = true; //如果一轮中没有发生更新，可以结束
         for (int j = 0; j < map->numVertexes; ++j) { //遍历所有边
             for (int k = 0; k < map->numVertexes; ++k) {
