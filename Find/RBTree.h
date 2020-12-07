@@ -13,7 +13,7 @@
  * 其中childPtr可以指向任意节点(n-),可以指向2-,3-....
  * 标准的B树节点，往往会在节点第一个补充数据，记录数据个数
  * 其中树中的节点，假如一个 2-节点，那么2-节点的2个孩子要么同时有，要么同时没有
- * 树中的节点都是由分裂、融合（即n-之间可以相互转化）而来，root除外
+ * 树中的节点都是由分裂、融合（即n-之间可以相互转化）而来，root除外，插入只发生在叶子节点上
  * B树的查找也很简单，与节点中的data比较，那么找出下一个指针域，以此类推，比如在3-查找时，如果key<data1,那么查找child1,如果data1<key<data2,在child2...
  *
  * B+ 树：不论是之前的二叉树还是B-树，数据都保存在节点中，以key查找到节点后，数据也一定保存在key相应节点中
@@ -44,8 +44,8 @@
  （1）树空时，插入 10， 生成2-节点node-2,node-2.data =10
   (2)假如查找停留在了一个 2-节点,即两边孩子均为null, 此时只需要将此2-节点--> 3-节点，两个data保持大小顺序 （融合）
   (3)查找停留在3-节点，此时 3-节点没有parent, 那么将data1,data2,key,按大小排列，假如是 data1,key,data2,为每个数生成一个2-
-    其中 key所在 2-.child1指向data1, child2指向data2   (分裂)
-
+    其中 key所在 2-.child1指向data1, child2指向data2   (分裂) 4-的分裂也一样，假如有 data1 < key < data2 < data3, 那么data1，key,{data2,data3}为2-,2-,3-节点，然后key的2-指向其他两个，key向上融合
+,
   (4)查找停留在3-（node1），其parent为2-(node2)，假如 node2.child2 = node1， 说明 node1的数都大于node2,key查找停留在node1,说明key>node2
     还是和上面一样，node1和key分为三个2-，假设中间数的2-为node3, 那么此时的 node3需要和node2融合为一个3-，假设为node4
     那么 node4.data1 = node2.data, node4.child1 = node2.child1
