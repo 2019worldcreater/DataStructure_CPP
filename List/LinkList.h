@@ -1,13 +1,13 @@
-/*»¹ÓĞÒ»ÖÖÁ´±íµÄĞÎÌ¬£º¾²Ì¬Á´±í£¬ÓÃÊı×éÀ´Ä£ÄâÁ´±í£¬¼´Êı×éÖĞµÄÔªËØÎªNode£¬Node{data¡¢index}; indexÎªÏÂÒ»¸öNodeÔÚÊı×éÖĞµÄÏÂ±ê
- * ÕâÊÇÎªÄÇĞ©Ã»ÓĞÖ¸ÕëÌØĞÔµÄÓïÑÔ×¼±¸µÄ£º
- * ÓÅµã£º Ïà±ÈÓÚÁ´±íµÄÔöÉ¾¸Ä£¬¾²Ì¬Á´±íÖ»ĞèÒª¸ÄindexÖµ
- * È±µã£ºÁ´±í³¤¶È±»ÏŞÖÆ¡¢Ê§È¥ÁËË³ĞòÊı×éµÄÌØĞÔ
- * Ö÷ÒªÊÇÀí½âÆäÇÉÃîµÄË¼Ïë
+/*è¿˜æœ‰ä¸€ç§é“¾è¡¨çš„å½¢æ€ï¼šé™æ€é“¾è¡¨ï¼Œç”¨æ•°ç»„æ¥æ¨¡æ‹Ÿé“¾è¡¨ï¼Œå³æ•°ç»„ä¸­çš„å…ƒç´ ä¸ºNodeï¼ŒNode{T dataã€int next}; nextä¸ºä¸‹ä¸€ä¸ªNodeåœ¨æ•°ç»„ä¸­çš„ä¸‹æ ‡
+ * è¿™æ˜¯ä¸ºé‚£äº›æ²¡æœ‰æŒ‡é’ˆç‰¹æ€§çš„è¯­è¨€å‡†å¤‡çš„ï¼š
+ * ä¼˜ç‚¹ï¼š ç›¸æ¯”äºé“¾è¡¨çš„å¢åˆ æ”¹ï¼Œé™æ€é“¾è¡¨åªéœ€è¦æ”¹nextå€¼
+ * ç¼ºç‚¹ï¼šé“¾è¡¨é•¿åº¦è¢«é™åˆ¶ã€å¤±å»äº†é¡ºåºæ•°ç»„çš„ç‰¹æ€§
+ * ä¸»è¦æ˜¯ç†è§£å…¶å·§å¦™çš„æ€æƒ³
  *
- * »¹´æÔÚÒ»Ğ© Ë«ÏòÑ­»·Á´±í£¨fore¡¢next£©¡¢µ¥ÏòÑ­»·ÁĞ±í£¨tail->next=top£¬ ¾­µäÎÊÌâ£ºÔ¼Éª·ò»·£©É¶µÄ£¬×Ô¼ºÁË½â¾ÍĞĞ£¬¾ÙÒ»·´Èı
- * Ñ­»·Á´±íÖĞÈç¹û²»ÓÃÍ·Ö¸Õë¶øÓÃÎ²Ö¸Õë£¬ÄÇÃ´¿ÉÒÔºÜ·½±ã²éÕÒÎ²½áµã£¬Ò²¿ÉÒÔºÜ·½±ãºÏ²¢Á½¸öÁ´±í£¨Ò»¸öÈËµÄÎ²Ö¸ÏòÁíÒ»¸öµÄÍ·£©
+ * è¿˜å­˜åœ¨ä¸€äº› åŒå‘å¾ªç¯é“¾è¡¨ï¼ˆforeã€nextï¼‰ã€å•å‘å¾ªç¯åˆ—è¡¨ï¼ˆtail->next=topï¼Œ ç»å…¸é—®é¢˜ï¼šçº¦ç‘Ÿå¤«ç¯ï¼‰å•¥çš„ï¼Œè‡ªå·±äº†è§£å°±è¡Œï¼Œä¸¾ä¸€åä¸‰
+ * å¾ªç¯é“¾è¡¨ä¸­å¦‚æœä¸ç”¨å¤´æŒ‡é’ˆè€Œç”¨å°¾æŒ‡é’ˆï¼Œé‚£ä¹ˆå¯ä»¥å¾ˆæ–¹ä¾¿æŸ¥æ‰¾å°¾ç»“ç‚¹ï¼Œä¹Ÿå¯ä»¥å¾ˆæ–¹ä¾¿åˆå¹¶ä¸¤ä¸ªé“¾è¡¨ï¼ˆä¸€ä¸ªäººçš„å°¾æŒ‡å‘å¦ä¸€ä¸ªçš„å¤´ï¼‰
  *
- * ²»Í¬µÄÁ´±íÓĞÆäÊÊºÏµÄÓ¦ÓÃÁìÓò
+ * ä¸åŒçš„é“¾è¡¨æœ‰å…¶é€‚åˆçš„åº”ç”¨é¢†åŸŸ
  * */
 
 #ifndef CLIONCPP_LINKLIST_H
@@ -22,12 +22,12 @@ using namespace StatusTool;
 template<typename T>
 class LinkList {
 private:
-    //Á´±íÖĞµÄ½Úµã¼´ Node<T>,°üº¬Êı¾İÓòdataºÍÖ¸ÕëÓònext, dataÓÃÓÚ±£´æÕæÕıĞÅÏ¢£¬nextÖ¸ÏòÏÂÒ»¸ö½Úµã
+    //é“¾è¡¨ä¸­çš„èŠ‚ç‚¹å³ Node<T>,åŒ…å«æ•°æ®åŸŸdataå’ŒæŒ‡é’ˆåŸŸnext, dataç”¨äºä¿å­˜çœŸæ­£ä¿¡æ¯ï¼ŒnextæŒ‡å‘ä¸‹ä¸€ä¸ªèŠ‚ç‚¹
     typedef Node<T> *nodePtr; //nodePtr === Node<T> *
-    nodePtr head = nullptr; //Ö¸ÏòÍ·½áµãµÄÍ·Ö¸Õë£¬ ÓĞÁËÍ·½Úµã£¬ÓĞĞ©²Ù×÷Âß¼­¸üÊÊÓÃ
-    int length = 0; //³ıÁËÍ·½áµãµÄÔªËØ¸öÊı
+    nodePtr head = nullptr; //æŒ‡å‘å¤´ç»“ç‚¹çš„å¤´æŒ‡é’ˆï¼Œ æœ‰äº†å¤´èŠ‚ç‚¹ï¼Œæœ‰äº›æ“ä½œé€»è¾‘æ›´é€‚ç”¨
+    int length = 0; //é™¤äº†å¤´ç»“ç‚¹çš„å…ƒç´ ä¸ªæ•°
 
-    //·µ»ØÏÂ±êindexµÄ½ÚµãµÄÖ¸Õë,Ê§°Ü·µ»Ønull,²»ÄÜÒÔ´Ë»ñµÃÍ·½áµã
+    //è¿”å›ä¸‹æ ‡indexçš„èŠ‚ç‚¹çš„æŒ‡é’ˆ,å¤±è´¥è¿”å›null,ä¸èƒ½ä»¥æ­¤è·å¾—å¤´ç»“ç‚¹
     nodePtr getNodePtrByIndex(int index) {
         nodePtr node = nullptr;
         if (isValid(index)) {
@@ -35,20 +35,20 @@ private:
             node = head;
             bool isFind = true;
             while (++i <= index) {
-                if (node->next == nullptr) { //¿ÉÄÜ³ö´í
+                if (node->next == nullptr) { //å¯èƒ½å‡ºé”™
                     isFind = false;
                     break;
                 }
                 node = node->next;
             }
-            node = isFind ? node : nullptr; //Ã¿´Î¶¼³É¹¦£¬²Å»áÓĞ i == index
+            node = isFind ? node : nullptr; //æ¯æ¬¡éƒ½æˆåŠŸï¼Œæ‰ä¼šæœ‰ i == index
         }
         return node;
     }
 
-    //ÔÚ¶ÑÖĞ´´½¨Á´±í½Úµã£¬²¢¸³ÖµÊı¾İÓò, ·µ»ØÆäÖ¸Õë£¬×¢ÒâÊ§°ÜµÄ»°·µ»Ønullptr
+    //åœ¨å †ä¸­åˆ›å»ºé“¾è¡¨èŠ‚ç‚¹ï¼Œå¹¶èµ‹å€¼æ•°æ®åŸŸ, è¿”å›å…¶æŒ‡é’ˆï¼Œæ³¨æ„å¤±è´¥çš„è¯è¿”å›nullptr
     nodePtr createNode(T data) {
-        nodePtr node = (nodePtr) malloc(sizeof(Node<T>)); //²»ÄÜ·µ»ØÖ¸ÏòÕ»ÄÚ´æµÄÖ¸Õë
+        nodePtr node = (nodePtr) malloc(sizeof(Node<T>)); //ä¸èƒ½è¿”å›æŒ‡å‘æ ˆå†…å­˜çš„æŒ‡é’ˆ
         if (node != nullptr) {
             node->data = data;
             node->next = nullptr;
@@ -57,23 +57,23 @@ private:
     }
 
 public:
-    //ÏÂ±êindexÊÇ·ñÓĞĞ§(0~length-1),Ò»°æÊÇº¯Êı²éÕÒÊı¾İÊ±µ÷ÓÃµÄ£¬ËùÒÔhead!=nullptr And top->next!=nullptrÒ²Ëã×÷Ìõ¼ş
+    //ä¸‹æ ‡indexæ˜¯å¦æœ‰æ•ˆ(0~length-1),ä¸€ç‰ˆæ˜¯å‡½æ•°æŸ¥æ‰¾æ•°æ®æ—¶è°ƒç”¨çš„ï¼Œæ‰€ä»¥head!=nullptr And top->next!=nullpträ¹Ÿç®—ä½œæ¡ä»¶
     bool isValid(int index) {
-        //ÀûÓÃ¶ÌÂ·&&µÄÌØµã£¬Èç¹ûhead!=nullptr,ÆäÓàÅĞ¶Ï²»»á½øĞĞ£¬ËùÒÔhead->next²»»á³ö´í
+        //åˆ©ç”¨çŸ­è·¯&&çš„ç‰¹ç‚¹ï¼Œå¦‚æœhead!=nullptr,å…¶ä½™åˆ¤æ–­ä¸ä¼šè¿›è¡Œï¼Œæ‰€ä»¥head->nextä¸ä¼šå‡ºé”™
         return isLinkListInitDone() && head->next != nullptr && index < length && index > -1;
     }
 
-    //´«Èë½ÚµãNodeÖĞ´æ´¢µÄTĞÍÊı¾İÊı×é, ×Ü¸öÊı
+    //ä¼ å…¥èŠ‚ç‚¹Nodeä¸­å­˜å‚¨çš„Tå‹æ•°æ®æ•°ç»„, æ€»ä¸ªæ•°
     LinkList(T *elements, int length) {
-        head = createNode(elements[0]); //³õÊ¼»¯Í·½áµã£¬ÒòÎªÒ»¶¨Òª´«²Î£¬ËùÒÔËæ±ã´«ÁË¸ö
+        head = createNode(elements[0]); //åˆå§‹åŒ–å¤´ç»“ç‚¹ï¼Œå› ä¸ºä¸€å®šè¦ä¼ å‚ï¼Œæ‰€ä»¥éšä¾¿ä¼ äº†ä¸ª
         if (head != nullptr) {
-            //Î²²å·¨²åÈë½Úµã
-            nodePtr tail = head; //×îºóÒ»¸ö½Úµã
+            //å°¾æ’æ³•æ’å…¥èŠ‚ç‚¹
+            nodePtr tail = head; //æœ€åä¸€ä¸ªèŠ‚ç‚¹
             int len = length;
-            while (length--) { //length´Î
-                tail->next = createNode(elements[len - length - 1]); //Î²²¿½ÚµãµÄnextÖ¸ÏòĞÂ½Úµã, ²»ÉêÇë¿Õ¼ä²»ÄÜÓÃ
+            while (length--) { //lengthæ¬¡
+                tail->next = createNode(elements[len - length - 1]); //å°¾éƒ¨èŠ‚ç‚¹çš„nextæŒ‡å‘æ–°èŠ‚ç‚¹, ä¸ç”³è¯·ç©ºé—´ä¸èƒ½ç”¨
                 if (tail->next != nullptr) {
-                    tail = tail->next; //¸üĞÂÎ²²¿½Úµã
+                    tail = tail->next; //æ›´æ–°å°¾éƒ¨èŠ‚ç‚¹
                     this->length++;
                 }
             }
@@ -83,10 +83,10 @@ public:
 
     LinkList() {
         T item;
-        head = createNode(item); //ÎªÍ·½áµã·ÖÅä¿Õ¼ä
+        head = createNode(item); //ä¸ºå¤´ç»“ç‚¹åˆ†é…ç©ºé—´
     }
 
-    //Á´±íÍ·½áµã·ÖÅäÊÇ·ñ³É¹¦
+    //é“¾è¡¨å¤´ç»“ç‚¹åˆ†é…æ˜¯å¦æˆåŠŸ
     bool isLinkListInitDone() {
         return head != nullptr;
     }
@@ -95,11 +95,11 @@ public:
         releaseLinkList();
     }
 
-    //Çå¿ÕÁ´±í£¬µ«±£ÁôÍ·½áµã
+    //æ¸…ç©ºé“¾è¡¨ï¼Œä½†ä¿ç•™å¤´ç»“ç‚¹
     void cleanLinkList() {
-        if (isLinkListInitDone()) { //top->next¿ÉÄÜ±¨´í
+        if (isLinkListInitDone()) { //top->nextå¯èƒ½æŠ¥é”™
             if (head->next != nullptr) {
-                int len = releaseLinkNodeFrom(&(head->next), this->length); //´«ÈëÖ¸ÏòÖ¸ÕëµÄÖ¸Õë,²ÅÄÜÔÚÄÚ²¿¸Ä±äÖ¸ÕëµÄÖµ
+                int len = releaseLinkNodeFrom(&(head->next), this->length); //ä¼ å…¥æŒ‡å‘æŒ‡é’ˆçš„æŒ‡é’ˆ,æ‰èƒ½åœ¨å†…éƒ¨æ”¹å˜æŒ‡é’ˆçš„å€¼
                 if (head->next == nullptr && len != -1) {
                     this->length = len;
                 }
@@ -107,7 +107,7 @@ public:
         }
     }
 
-    //Çå¿ÕËùÓĞ
+    //æ¸…ç©ºæ‰€æœ‰
     void releaseLinkList() {
         if (isLinkListInitDone()) {
             int len = releaseLinkNodeFrom(&head, this->length);
@@ -117,7 +117,7 @@ public:
         }
     }
 
-    //ÓÃĞÂÖµ¸Ä±ä¾É½ÚµãÖµ£¬¾ÉÖµ¸³Öµ¸øold
+    //ç”¨æ–°å€¼æ”¹å˜æ—§èŠ‚ç‚¹å€¼ï¼Œæ—§å€¼èµ‹å€¼ç»™old
     bool modifyDataByIndex(int index, T data) {
         nodePtr node = getNodePtrByIndex(index);
         if (node != nullptr) {
@@ -127,13 +127,13 @@ public:
         return false;
     }
 
-//Ôö¼Ó½Úµãµ½Á´±íºóÃæ,trueÎª³É¹¦
+//å¢åŠ èŠ‚ç‚¹åˆ°é“¾è¡¨åé¢,trueä¸ºæˆåŠŸ
     bool addNode(T data) {
         nodePtr tail;
         if (length == 0)
             tail = head;
         else
-            tail = getNodePtrByIndex(length - 1); //×îºóÒ»¸ö½Úµã
+            tail = getNodePtrByIndex(length - 1); //æœ€åä¸€ä¸ªèŠ‚ç‚¹
         if (tail != nullptr) {
             nodePtr node = createNode(data);
             if (node != nullptr) {
@@ -145,20 +145,20 @@ public:
         return false;
     }
 
-//É¾³ıÏÂ±êÎªindexµÄ½Úµã£¬¼´Âß¼­ÉÏµÚindex+1¸ö£¬²¢½«½ÚµãÖµ¸³Öµ¸ødata£¬³É¹¦true
+//åˆ é™¤ä¸‹æ ‡ä¸ºindexçš„èŠ‚ç‚¹ï¼Œå³é€»è¾‘ä¸Šç¬¬index+1ä¸ªï¼Œå¹¶å°†èŠ‚ç‚¹å€¼èµ‹å€¼ç»™dataï¼ŒæˆåŠŸtrue
     bool deleteNodeByIndex(int index, T *data) {
         nodePtr preNode = nullptr;
-        if (index == 0) //getNode²»ÄÜ·µ»ØÍ·½áµã
+        if (index == 0) //getNodeä¸èƒ½è¿”å›å¤´ç»“ç‚¹
             preNode = head;
         else
-            preNode = getNodePtrByIndex(index - 1); //É¾³ı½ÚµãµÄÇ°Ò»¸ö
+            preNode = getNodePtrByIndex(index - 1); //åˆ é™¤èŠ‚ç‚¹çš„å‰ä¸€ä¸ª
         if (preNode != nullptr) {
             if (preNode->next != nullptr) {
                 nodePtr node = preNode->next;
                 nodePtr next = node->next;
                 *data = node->data;
                 preNode->next = next;
-                free(node); //ÊÍ·Åindex½Úµã
+                free(node); //é‡Šæ”¾indexèŠ‚ç‚¹
                 this->length--;
                 return true;
             }
@@ -166,8 +166,8 @@ public:
         return false;
     }
 
-//²åÈë½Úµãµ½ÏÂ±êindex´¦£¬Ô­Î»ÖÃµÄ½Úµã¿¿ºóÒ»Î»£¬³É¹¦·µ»Øtrue
-//´ËÊ±µÄindex¿ÉÒÔÎªÁ´±í³¤¶È£¬¼´addNode
+//æ’å…¥èŠ‚ç‚¹åˆ°ä¸‹æ ‡indexå¤„ï¼ŒåŸä½ç½®çš„èŠ‚ç‚¹é åä¸€ä½ï¼ŒæˆåŠŸè¿”å›true
+//æ­¤æ—¶çš„indexå¯ä»¥ä¸ºé“¾è¡¨é•¿åº¦ï¼Œå³addNode
     bool insertInto(int index, T data) {
         if (index == length)
             return addNode(data);
@@ -178,7 +178,7 @@ public:
             else
                 preNode = getNodePtrByIndex(index - 1);
             if (preNode != nullptr) {
-                nodePtr next = preNode->next; //Ô­Î»ÖÃ½Úµã
+                nodePtr next = preNode->next; //åŸä½ç½®èŠ‚ç‚¹
                 if (next != nullptr) {
                     nodePtr node = createNode(data);
                     if (node != nullptr) {
@@ -193,7 +193,7 @@ public:
         return false;
     }
 
-//²éÕÒindex(0~len-1)½ÚµãµÄÊı¾İ£¬³É¹¦·µ»Øtrue
+//æŸ¥æ‰¾index(0~len-1)èŠ‚ç‚¹çš„æ•°æ®ï¼ŒæˆåŠŸè¿”å›true
     bool getDataByIndex(int index, T *data) {
         nodePtr node = getNodePtrByIndex(index);
         if (node != nullptr) {
@@ -203,18 +203,18 @@ public:
         return false;
     }
 
-//Á´±í³¤¶È£¬-1´ú±íÁ´±í³õÊ¼»¯Ê§°Ü£¬0 ´ú±í¿ÕÁ´±í
+//é“¾è¡¨é•¿åº¦ï¼Œ-1ä»£è¡¨é“¾è¡¨åˆå§‹åŒ–å¤±è´¥ï¼Œ0 ä»£è¡¨ç©ºé“¾è¡¨
     int getLength() {
         return isLinkListInitDone() ? length : -1;
     }
 
-//Á´±íÎ´³õÊ¼»¯»ò¿ÕÊ±¶¼Îªtrue
+//é“¾è¡¨æœªåˆå§‹åŒ–æˆ–ç©ºæ—¶éƒ½ä¸ºtrue
     bool isEmpty() {
         return !isLinkListInitDone() || length < 1;
     }
 
-//·µ»Ø½ÚµãÖĞµÚÒ»¸öÊı¾İÓëdataÏàµÈµÄ½ÚµãµÄÏÂ±ê£¬¼´ËûÊÇÍ·½áµãºóÃæµÚindex+1¸ö£¬·µ»ØÖµÖ»ÄÜÊÇ 0~len-1
-//ÍÆ¼ö·µ»ØµÄÏÂ±êÊ¹ÓÃ isValid¼ìÑé
+//è¿”å›èŠ‚ç‚¹ä¸­ç¬¬ä¸€ä¸ªæ•°æ®ä¸dataç›¸ç­‰çš„èŠ‚ç‚¹çš„ä¸‹æ ‡ï¼Œå³ä»–æ˜¯å¤´ç»“ç‚¹åé¢ç¬¬index+1ä¸ªï¼Œè¿”å›å€¼åªèƒ½æ˜¯ 0~len-1
+//æ¨èè¿”å›çš„ä¸‹æ ‡ä½¿ç”¨ isValidæ£€éªŒ
     int getIndexOfData(T data) {
         int index = 0;
         nodePtr node = getNodePtrByIndex(index);
@@ -228,7 +228,7 @@ public:
         return -1;
     }
 
-//½«Á´±íÖĞËùÓĞÖµ°´Ë³Ğò´æ´¢ÔÚallÖĞ£¬½¨Òé T r[getLength()], ·µ»Ø×Ü¸öÊı
+//å°†é“¾è¡¨ä¸­æ‰€æœ‰å€¼æŒ‰é¡ºåºå­˜å‚¨åœ¨allä¸­ï¼Œå»ºè®® T r[getLength()], è¿”å›æ€»ä¸ªæ•°
     int getAllData(T *all) {
         if (!isEmpty()) {
             int i = 0;
