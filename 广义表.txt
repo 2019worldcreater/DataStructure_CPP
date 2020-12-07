@@ -1,0 +1,44 @@
+广义表 ：  {1, { 1,2,3 }, { 1, { 2,3 } } }  像这种表中有表的就是广义表 即跟组合模式的概念一样，存在 item,plate
+令 A = (1), B = (1,2,3), C = (2,3)
+那么上面的广义表 S=(A,B,(A,C))
+	
+如何存储：
+struct node{
+  bool tag;
+  union{ //union表示其中的元素只能保存一个，即 atomNode{bool tag, char atom} 或 ListNode{bool tag, ptr{child,bro}}
+        char atom; //原子结点的值域
+        struct{
+            node  *child,*bro;   
+        }ptr; //ptr结构体
+};
+
+（1）第一种表示法:  每个原子节点都由atomNode存储, 而每个原子节点必需被一个 ListNode的child所指向
+       假设有  {a, {b,c}, d},  那么node1={true,a}, node2 = {true, b}, node3 = c, node4 = d
+       令 listNode.tag为false,  listNode1.child = node1, .....listNode4.child = node4
+       此时 bc同属一个表，那么 listNode2.bro = listNode3,   由于a与 {bc}属于一个表（而非 b,c), 不能使listNode1.bro = listNode2
+       所以我们需要将一个广义表 {b,c}看成一个atom, 为其生成一个 ListNode5, ListNode5.child = listNode2, 
+      此时 ListNode5代表 {b,c}， 所以  listNode1.bro = listNode5, ListNode5.bro = listNode4
+
+     如果上面的是 {a, {b,c,{e,f},}, d}, 即 {b,c, {e,f } },  假设 node5 = e, node6 = f, listNodeE.child = node5, ListNodeF.child = node6
+   listNodeE.bro = ListNodeF,   此时为 {e,f}生成一个  listNode7, listNode7.child = listNodeE, listNode3.bro = listNode7
+
+   即 listNode指向一个原子节点，或者是广义表的第一个节点
+
+(2)第二种表示法
+ struct node{
+  bool tag;
+  union{
+     T data;
+     node *child
+   }
+  node *next;
+}
+
+称 atomNode{true, data, next}, listNode{false, node *child, next}
+对于每个原子节点，都由 atomNode保存, 对于每个广义表都有 listNode指向
+{a, {b,c}, d},  令 node1 = a, .... node4 = d,    那么 node2.next = node3 (同属一个表),  此时有 listNode1.child = node2, 对应 {b,c}
+然后 node1.next = listNode1, listNode1.bro =node4 
+注意外围的整个广义表， 所以有 listNode2.child = node1
+
+假设 {b,c {e, f}} ,  node5 = e, node6 = f,  那么 node5.next = node6, listNode3.child = node5,  node3.next = listNode3
+
