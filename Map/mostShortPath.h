@@ -42,8 +42,7 @@
 //函数结束后，会得到originalVex到其他所有顶点的最短路径， 如果不可到达，即为65535， 想要知道任意两点间的path，只需为每个顶点调用该函数
 //邻接矩阵：有边就为权值，没边即为0
 template<typename T>
-void
-DijkstraMostShortPath(NearByMatrix<T> *map, int *preVexOfEachVexInShortPath, int *shortPathLength, int originalVex) {
+void DijkstraMostShortPath(NearByMatrix<T> *map, int *preVexOfEachVexInShortPath, int *shortPathLength, int originalVex) {
     int infinity = 65535; //不可能之数
     bool isFindTheMostShortPath[map->numVertexes]; //是否找到真正最短路径的标志位
     for (int i = 0; i < map->numVertexes; ++i) {
